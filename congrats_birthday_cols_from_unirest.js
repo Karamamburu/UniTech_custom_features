@@ -11,24 +11,28 @@ function getReadableShortDate(date) {
 
 //ищем сотрудников subdivision_corporate_rsc и корпоративных директоров, у которых сегодня день рождения
 var queryBirthdayCollaborators = "sql: 
-			SELECT id, fullname FROM collaborators 
-			WHERE DAY(birth_date) = DAY(GETDATE()) 
-			AND MONTH(birth_date) = MONTH(GETDATE()) 
-			AND position_parent_id = 7174468763328728044 
-			AND position_name IN ('RSC', 'RSC Contractor', 'Area Coach', 'Region Coach') 
-			AND is_dismiss = 0
+						WITH birth_today AS (
+							SELECT id, fullname, position_parent_id, position_name
+							FROM collaborators 
+							WHERE DAY(birth_date) = DAY(GETDATE()) 
+							AND MONTH(birth_date) = MONTH(GETDATE()) 
+							AND is_dismiss = 0
+							AND LEN(login) = 7
+						)
+							SELECT id
+							FROM birth_today
+							WHERE position_parent_id = 7174468763328728044
+							AND position_name IN ('RSC', 'RSC Contractor', 'Area Coach', 'Region Coach')
 
-			UNION
+							UNION
 
-			SELECT c.id, c.fullname FROM collaborators c
-			LEFT JOIN subdivisions s ON c.position_parent_id = s.id
-			WHERE s.parent_object_id = 7174468764482109387
-			AND DAY(birth_date) = DAY(GETDATE()) 
-			AND MONTH(birth_date) = MONTH(GETDATE()) 
-			AND c.is_dismiss = 0
-			AND c.position_name IN ('RGM', 'RGM Trainee')
-
+							SELECT bt.id
+							FROM birth_today bt
+							JOIN subdivisions s ON bt.position_parent_id = s.id
+							WHERE s.parent_object_id = 7174468764482109387
+							AND bt.position_name IN ('RGM', 'RGM Trainee')
 "
+
 
 var birthdayCollaborators = ArraySelectAll(XQuery(queryBirthdayCollaborators))
 alert(ArrayCount(birthdayCollaborators))
@@ -89,6 +93,5 @@ if(!ArrayCount(birthdayCollaborators)) {
 		tools.create_notification("rsc_unirest_birthday_notification_type", col.collaborator_id, fullText)
 		alert("notification for " + col.collaborator_fullname + " successfully created")
 	}
-
 
 }
