@@ -91,29 +91,31 @@
         }
     </style>
 </head>
-
+    
 <body cellpadding="0" cellspacing="0" style="padding: 0; margin: 0; border: 0; width:100%; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; background-color: #efefef;">
-    <%
-        var monthsArray = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+<%
+    function getOnlyName(fullname) {
+	_newFullnameArray = []
+	_fullnameArray = fullname.split(" ")
 
-        var curDate =  Date();
-        var day = Day(curDate);
-        var month = Month(curDate);
-        var monthName = monthsArray[month - 1];
+	for (string in _fullnameArray) {
+		_firstLetter = string.slice(0, 1)
+		_capitalizedFirstLetter = StrUpperCase(_firstLetter)
+		_newString = _capitalizedFirstLetter + string.slice(1)
+		_newFullnameArray.push(_newString)
+	}
 
-        var readableShortDate = day + " " + monthName
+	_name = _newFullnameArray[1]
 
-        var fullname = objDoc.fullname
-        var fullnameArray = fullname.split(" ")
-        var name = fullnameArray[1]
-        var lastName = fullnameArray[0]
-        var readableShortName = name + " " + lastName 
+    return _name
+}
+
+var bossName = getOnlyName(objDoc.fullname)
     %>
     <!--allrecords-->
     <table id="allrecords" class="t-records" data-tilda-email="yes" data-tilda-project-id="10500485" data-tilda-page-id="54397379" data-tilda-page-alias="" cellpadding="0" cellspacing="0" style="width:100%; border-collapse:collapse; border-spacing:0; padding:0; margin:0; border:0;">
         <tr>
-            <td style="background-color: #efefef; background-repeat:no-repeat;background-position:center top;background-size: 65%; "
-            background="https://academy.uni.rest/download_file.html?file_id=7411148327761836909">
+            <td style="background-color: #efefef; background-repeat:no-repeat;background-position:center top;background-size: 65%; ">
                 <!--record_mail-->
                 <table id="rec794226174" style="width:100%; border-collapse:collapse; border-spacing:0; margin:0; border:0;" cellpadding="0" cellspacing="0" data-record-type="623">
                     <tr>
@@ -175,7 +177,7 @@
                                             <tr>
                                                 <td style="text-align: center; padding: 0 0 0;">
                                                     <div style="margin: 0 auto; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; color:#a020c2;font-size:24px;line-height:1.2;font-weight:bold;">
-                                                        Мега событие!
+                                                        Привет, <%=bossName%>!
                                                     </div>
                                                 </td>
                                             </tr>
@@ -198,32 +200,7 @@
                                             <tr>
                                                 <td style="text-align: center; padding: 0 0 0;">
                                                     <div style="margin: 0 auto; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; color:#000000;font-size:34px;">
-                                                        <strong><%=readableShortName%></strong>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-                <!--/record-->
-                <!--record_mail-->
-                <table id="rec794271510" style="width:100%; border-collapse:collapse; border-spacing:0; margin:0; border:0;" cellpadding="0" cellspacing="0" data-record-type="329">
-                    <tr>
-                        <td style="padding-left:15px; padding-right:15px; ">
-                            <table id="recin794271510" class="r" style="margin: 0 auto;border-spacing: 0;width:600px;" align="center">
-                                <tr>
-                                    <td style="padding-top:15px;padding-bottom:15px;padding-left:30px;padding-right:30px;">
-                                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%;">
-                                            <tr>
-                                                <td style="text-align: center; padding: 0 0 0;">
-                                                    <div style="margin: 0 auto; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; color:#323232;font-size:20px;line-height:1.4;">
-                                                        сегодня, <b><%=readableShortDate%></b>, отмечает свой День Рождения!<br />
-                                                        Поздравляем от всей команды Rostics, желаем развиваться лично и профессионально, 
-                                                        ставить перед собой смелые цели, добиваться крутых результатов и жить полной, насыщенной жизнью! 
+                                                        <%=Text%>
                                                     </div>
                                                 </td>
                                             </tr>
