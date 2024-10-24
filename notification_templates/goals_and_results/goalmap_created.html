@@ -84,6 +84,7 @@
     var target_url = UrlAppendPath( global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + data.goalmapId);
 
     var colName = tools.call_code_library_method('get_readable', 'getOnlyName', [data.workerFio])
+}
 %>
     cellpadding="0"
     cellspacing="0"
@@ -296,7 +297,7 @@
                                 margin: 0 auto;
                                 font-family: Verdana, Geneva, Tahoma, sans-serif, Helvetica, Arial;
                                 color: #323232;
-                                font-size: 24px;
+                                font-size: 48px;
                                 line-height: 1.2;
                                 font-weight: bold;
                               "
@@ -357,11 +358,13 @@
                                 margin: 0 auto;
                                 font-family:  Verdana, Geneva, Tahoma, sans-serif, Helvetica, Arial;
                                 color: #000000;
-                                font-size: 16px;
+                                font-size: 20px;
                               "
                             >
-                            Напоминаем о необходимости заполнить форму целей на текущий год в Академии и отправить её на согласование руководителю.<br>
-                            Перейти к заполнению формы ты можешь, нажав на кнопку ниже
+                            Рады видеть тебя в нашей команде!<br>
+                            Одними из ключевых этапов годового цикла работы сотрудников в нашей компании являются процессы постановки целей и подведения итогов года, которые реализованы в нашей HR-системе Академия.<br>
+                            Тебе нужно сформулировать свои годовые цели (или на испытательный срок) и отправить на согласование своему руководителю. Внести все формулировки целей можно, заполнив форму "Мои цели и результаты".<br>
+                            Перейти к заполнению твоей формы целей ты можешь, нажав на кнопку
                             </div>
                           </td>
                         </tr>
@@ -455,7 +458,7 @@
                                       </center>
                                     </v:roundrect>
                                   <![endif]-->
-                                <!--[if !mso]-->
+<!--[if !mso]-->
                                   <a
                                     style="
                                       display: table-cell;
