@@ -1,0 +1,172 @@
+.wt-side-menu-main, 
+.wt-a-wf-scale-block,
+.wt-appr-c-table-table[wt-type='unified'] .wt-appr-i-row-num,
+tr[wt-role="uc-header-row"],
+.wt-a-totals-list li:nth-child(2),
+.wt-a-sheet-tab-list,
+.wt-a-user-info-icon,
+.wt-pa-header-title,
+.wt-navigation .wt-top-logo,
+.wt-header-container {
+	display: none;
+}
+
+.wt-a-totals-item .wt-a-totals-title span[wt-role='comp-user-score'] {
+	margin: 0 10px 0 0;
+}
+
+.wt-control-block.wt-radio-block .wt-radio-block-col-container {
+	padding: 0 0.4rem 0 0;
+}
+
+.wt-appr-c-block-btns,
+.wt-appr-page .wt-a-wf-btns-left {
+	display: flex;
+	justify-content: flex-end;
+	padding: 0;
+}
+
+.wt-appr-c-block-btns {
+	margin: 2.4rem 0 0 0;
+}
+
+.wt-appr-c-btn-save {
+	margin: 0 0.8rem 1rem 0;
+}
+
+.wt-a-totals-list {
+	display: flex;
+	justify-content: center;
+	margin: 2.4rem 2.4rem  0 0.8rem;
+	background-color: #fff;
+	border: 1px solid #dbdcdf;
+	border-radius: 5%;
+}
+
+.wt-a-totals-list li:nth-child(1) {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	flex-direction: row;
+	align-items: center;
+	background: none;
+	margin: 0 0 0 0.8rem;
+}
+
+.wt-a-totals-item {
+	color: #000;
+}
+
+.wt-a-totals-item .wt-a-totals-value {
+	margin: 0 0 0 10%;
+}
+
+.wt-appr-page-header {
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.wt-appr-c-btn-save,
+.wt-appr-page .wt-a-flow-btn,
+.wt-dialog.ui-dialog.ui-widget .wt-dialog-ok,
+.confirm_button {
+	border: 1px solid #FF0000;
+	background-color: #FFFFFF !important;
+	color: #FF0000;
+	transition: 0.15s;
+	background-image: none;
+}
+
+.wt-appr-c-block-cell {
+	padding: 25px 0 0 0 !important;
+}
+
+.wt-radio-item .wt-radio-btn {
+	box-sizing: border-box !important;
+}
+
+.wt-a-sheet-top-block {
+	padding: 1rem;
+}
+
+.wt-appr-c-table-table[wt-type='unified'] .wt-appr-i-row-title {
+	font-weight: normal;
+}
+
+.wta-comp-span {
+	background-color: #FF0000;
+}
+
+div[wt-item="0"] .wt-radio-btn:hover,
+div[wt-item="1"] .wt-radio-btn:hover {
+	cursor: pointer;
+}
+
+div[wt-item="0"] .wt-radio-btn,
+div[wt-item="1"] .wt-radio-btn {
+	background-color: #fff !important;
+	background-repeat: no-repeat;
+}
+
+div[wt-state="idle"] .wt-radio-btn {
+	border: 1px solid #dbdcdf !important; 
+}
+
+div[wt-state="selected"] .wt-radio-btn {
+	border: 1px solid #FF0000;
+}
+
+div[wt-item="0"] .wt-radio-btn .wt-radio-item-spot {
+	background-image: url("https://academy.uni.rest/download_file.html?file_id=7426336735514301759") !important; 
+	background-repeat: no-repeat;
+}
+
+div[wt-item="1"] .wt-radio-btn .wt-radio-item-spot {
+	background-image: url("https://academy.uni.rest/download_file.html?file_id=7426336427840269514") !important; 
+}
+
+
+
+
+@media (max-width: 600px) {
+
+	.wt-control-block.wt-radio-block .wt-radio-block-col-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.wt-appr-page-header {
+		justify-content: space-between;
+	}
+
+	.wt-pa-header-title, 
+	.wt-a-sheet-tab-list,
+	.wt-header-container {
+		display: none;
+	}
+
+	.wt-radio-block .wt-radio-item {
+		margin: 0;
+	}
+
+	.wt-a-sheet-pages {
+		padding: 0 0 4rem 0;
+	}
+
+	.wt-a-user-info-container {
+		padding: 1rem 0 0 0;
+	}
+
+	.wt-a-user-info-item {
+		width: 45%;
+		height: 100%;
+	}
+
+	.wt-radio-item .wt-radio-btn {
+		width: 25%;
+	}
+}
