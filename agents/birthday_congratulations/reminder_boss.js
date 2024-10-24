@@ -65,12 +65,14 @@ if (!ArrayCount(birthdayInfo)) {
 			"}" +
 			"</style>"
 
+		_dateText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '> Совсем скоро, <b>" + getReadableShortDate(object.birth_date) + "</b>,"
+				
+
 		_notificationText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
-			"скоро, <b>" + getReadableShortDate(object.birth_date) + 
-			"</b>,  отмечает свой День рождения!<br>
+			"отмечает свой День рождения!<br>
 			Одна из наших ценностей – Командная работа, и День рождения – отличный повод признать вклад именинника в общее дело. Поздравь своего коллегу от всей команды Rostics!</p>"
 
-		_fullText = _readableShortName + "<br>" + _notificationText
+		_fullText = _dateText + "<br>" + _readableShortName + "<br>" + _notificationText
 		tools.create_notification("boss_birthday_notification_type", 7138424178183920544, _fullText)
 	}
 
