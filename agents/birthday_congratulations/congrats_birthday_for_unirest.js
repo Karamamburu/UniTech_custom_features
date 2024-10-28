@@ -18,7 +18,7 @@ var queryBirthdayCollaborators = "sql:
 							AND MONTH(birth_date) = MONTH(GETDATE()) 
 							AND is_dismiss = 0
 							AND LEN(login) = 7
-						)
+                            				)
 							SELECT id
 							FROM birth_today
 							WHERE position_parent_id = 7174468763328728044
@@ -48,8 +48,8 @@ if(!ArrayCount(birthdayCollaborators)) {
 	for (col in birthdayCollaborators) {
 
 		_teColDoc = tools.open_doc(col.id).TopElem
-		_colShortName = "<p style='font-size: 1.2em; padding: 0; margin: 0;'>" + _teColDoc.firstname + " " + _teColDoc.lastname + "</p>"
-		_colPositionName = "<p style='font-size: 0.7em; font-weight: normal; margin: 0;'>" + _teColDoc.position_name + "</p></br style='margin=1em;'>"
+		_colShortName = "<p style='font-size: 1em; padding: 0; margin: 0;'>" + _teColDoc.firstname + " " + _teColDoc.lastname + "</p>"
+		_colPositionName = "<p style='font-size: 0.5em; font-weight: normal; margin: 0;'>" + _teColDoc.position_name + "</p></br style='margin=0.2em;'>"
 
 		colsArray.push(_colShortName)
 		colsArray.push(_colPositionName)
@@ -57,26 +57,27 @@ if(!ArrayCount(birthdayCollaborators)) {
 	}
 
 	//собираем разметку сообщения из двух блоков
-	var birthdaysColsBlock = "<div style='padding: 10px; margin-top: 20px;'>" + 
+	var birthdaysColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
 		colsArray.join(" ") + 
 		"</div>" + 
 		"<style>" +
 		"@media (max-width: 600px) {" +
-		"  p { font-size: 0.8em; }" +
+		"  p { font-size: 0.4em;}" +
 		"}" +
 		"</style>"
 
-	var congratulationText = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>сегодня, <b>" + getReadableShortDate(Date()) + "</b>, " + 
-		(birthdayCollaborators.length == 1 ? "отмечает" : "отмечают") + 
-		" свой День Рождения!<br/><br/>" +
-		"Поздравляем от всей команды Rostics, желаем развиваться лично и профессионально, " + 
-		"ставить перед собой смелые цели, добиваться крутых результатов и жить полной, насыщенной жизнью!</p>"
+        var congratulationText0 = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>Сегодня, <b>" + getReadableShortDate(Date()) + "</b>, " + 
+		(birthdayCollaborators.length == 1 ? "отмечает свой День Рождения" : "отмечают свой День Рождения:") + 
+		"<br/></p>"
 
-	var fullText = birthdaysColsBlock + congratulationText
+	var congratulationText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
+		"от&nbsp;всей команды&nbsp;Rostics, желаем развиваться&nbsp;лично и&nbsp;профессионально, " + 
+		"ставить перед&nbsp;собой смелые&nbsp;цели, добиваться крутых&nbsp;результатов и&nbsp;жить&nbsp;полной, насыщенной&nbsp;жизнью!</p>"
+
+	var fullText = congratulationText0 + birthdaysColsBlock + congratulationText
 
 	alert(fullText)
 
-	tools.create_notification("rsc_unirest_birthday_notification_type", 7281405151477773727, fullText)
 
 	//находим сотрудников, которым отправить уведомление
 	
