@@ -1,13 +1,14 @@
-function getReadableShortDate(date) {
-	var monthsArray = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-
-        var day = Day(date);
-        var month = Month(date);
-        var monthName = monthsArray[month - 1];
-        var readableShortDate = day + " " + monthName
-
-	return readableShortDate
+function Log(message, ex) {
+    if(ex == null || ex == undefined) {
+        LogEvent(Param.log_file_name, message);
+    } else {
+        LogEvent(Param.log_file_name, (message + ' Exception: ' + ex));
+    }
 }
+
+EnableLog(Param.log_file_name, true);
+
+Log("Начало работы агента");
 
 //ищем сотрудников subdivision_corporate_rsc и корпоративных директоров, у которых сегодня день рождения
 var queryBirthdayCollaborators = "sql: 
@@ -35,7 +36,7 @@ var queryBirthdayCollaborators = "sql:
 
 
 var birthdayCollaborators = ArraySelectAll(XQuery(queryBirthdayCollaborators))
-alert(ArrayCount(birthdayCollaborators))
+Log("Именинников сегодня: " + ArrayCount(birthdayCollaborators));
 
 if(!ArrayCount(birthdayCollaborators)) {
 
@@ -66,7 +67,8 @@ if(!ArrayCount(birthdayCollaborators)) {
 		"}" +
 		"</style>"
 
-        var congratulationText0 = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>Сегодня, <b>" + getReadableShortDate(Date()) + "</b>, " + 
+        var congratulationText0 = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>Сегодня, <b>" + 
+		tools.call_code_library_method('get_readable', 'getReadableShortDate', [Date()]) + "</b>, " + 
 		(birthdayCollaborators.length == 1 ? "отмечает свой День Рождения" : "отмечают свой День Рождения:") + 
 		"<br/></p>"
 
@@ -76,11 +78,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 
 	var fullText = congratulationText0 + birthdaysColsBlock + congratulationText
 
-	alert(fullText)
-
-
 	//находим сотрудников, которым отправить уведомление
-	
 	var groupToSendNotificationId = Int(Param.group_id)
 
 	var queryColsToSendNotification = "sql:
@@ -91,8 +89,15 @@ if(!ArrayCount(birthdayCollaborators)) {
 
 	//отправляем уведомления
 	for (col in colsToSendNotifications) {
-		tools.create_notification("rsc_unirest_birthday_notification_type", col.collaborator_id, fullText)
-		alert("notification for " + col.collaborator_fullname + " successfully created")
+		try {
+			tools.create_notification("rsc_unirest_birthday_notification_type", col.collaborator_id, fullText)
+		} catch(ex) {
+			 Log("Ошибка при выполнении агента: " + ex);
+		}
+		
 	}
-
+	Log("Уведомления отправлены " + ArrayCount(colsToSendNotifications) + " сотрудникам");
 }
+
+Log("Окончание работы агента");
+EnableLog(Param.log_file_name, false);
