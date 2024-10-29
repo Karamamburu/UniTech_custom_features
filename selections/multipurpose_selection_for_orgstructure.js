@@ -15,6 +15,7 @@ var queryResult = XQuery("sql:
                         "
 );
 colsList= queryResult;
+
 COLUMNS = [
   { data: "id", type: "integer", title: "ID" },
   { data: "login", type: "string", title: "Логин" },
@@ -30,8 +31,8 @@ for (ListElem in colsList) {
   RESULT.push((colData = new Object()));
 
   colElement = ListElem.Child("id");
-  colData.id = colElement.HasValue ? colElement.Value : null;
-  colData.link = colElement.HasValue ? "/person/" + colElement.Value : null;
+  colData.id = colElement.Value;
+  colData.link = "/person/" + colElement.Value;
 
   colElement = ListElem.Child("login");
   colData.login = colElement.HasValue ? colElement.Value : null;
