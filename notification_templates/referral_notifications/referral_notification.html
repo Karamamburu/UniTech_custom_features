@@ -357,7 +357,7 @@
                             <b><%=tools.call_code_library_method("get_readable", "getReadableShortName", [objDoc.person_fullname]) %></b>
                             прислал резюме на позицию <b><%=tools.open_doc(objDocID).TopElem.custom_elems.ObtainChildByKey("wishful_position_name").value%></b> 
                             и теперь участвует в программе Приведи Друга. <br>
-                            Скачать резюме можно здесь:
+                            Посмотреть заявку и скачать резюме можно здесь:
                             </div>
                           </td>
                         </tr>
@@ -423,7 +423,7 @@
                                     <v:roundrect
                                       xmlns:v="urn:schemas-microsoft-com:vml"
                                       xmlns:w="urn:schemas-microsoft-com:office:word"
-                                      href=<%=UrlAppendPath( global_settings.settings.portal_base_url, "_wt/" + tools.open_doc(objDocID).TopElem.custom_elems.ObtainChildByKey("cv_id").value)%>
+                                      href=<%=UrlAppendPath( global_settings.settings.portal_base_url, "_wt/" + objDocID)%>
                                       style="
                                         height: 52px;
                                         v-text-anchor: middle;
@@ -447,7 +447,7 @@
                                           color: #ffffff;
                                         "
                                       >
-                                        Скачать резюме
+                                        Перейти к заявке
                                       </center>
                                     </v:roundrect>
                                   <![endif]-->
@@ -470,7 +470,7 @@
                                     "
                                     href=<%=UrlAppendPath( global_settings.settings.portal_base_url, "_wt/" + tools.open_doc(objDocID).TopElem.custom_elems.ObtainChildByKey("cv_id").value)%>
                                   >
-                                    Скачать резюме
+                                    Перейти к заявке
                                   </a>
                                   <!--[endif]-->
                                 </td>
