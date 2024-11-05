@@ -6,6 +6,11 @@ function Log(message, ex) {
     }
 }
 
+function normalizeName(name) {
+	_normalName = tools.call_code_library_method('get_readable', 'convertNameToNormalCase', [name])
+	return _normalName
+}
+
 EnableLog(Param.log_file_name, true);
 
 Log("Начало работы агента");
@@ -36,21 +41,24 @@ var queryBirthdayCollaborators = "sql:
 
 
 var birthdayCollaborators = ArraySelectAll(XQuery(queryBirthdayCollaborators))
-Log("Именинников сегодня: " + ArrayCount(birthdayCollaborators));
 
 if(!ArrayCount(birthdayCollaborators)) {
 
-	alert("сегодня именинников нет")
+	Log("сегодня именинников нет")
 
 } else {
-
+	Log("Именинников сегодня: " + ArrayCount(birthdayCollaborators));
 	var colsArray = []
 
 	for (col in birthdayCollaborators) {
 
 		_teColDoc = tools.open_doc(col.id).TopElem
-		_colShortName = "<p style='font-size: 1em; padding: 0; margin: 0;'>" + _teColDoc.firstname + " " + _teColDoc.lastname + "</p>"
+		_normalizedName = normalizeName(_teColDoc.firstname) + " " + normalizeName(_teColDoc.lastname)
+
+		_colShortName = "<p style='font-size: 1em; padding: 0; margin: 0;'>" + _normalizedName + "</p>";
 		_colPositionName = "<p style='font-size: 0.5em; font-weight: normal; margin: 0;'>" + _teColDoc.position_name + "</p></br style='margin=0.2em;'>"
+
+		Log(_normalizedName + " - " + _teColDoc.position_name)
 
 		colsArray.push(_colShortName)
 		colsArray.push(_colPositionName)

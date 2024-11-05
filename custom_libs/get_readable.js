@@ -55,3 +55,13 @@ function getOnlyName(fullname) {
 
     return _name
 }
+
+function convertNameToNormalCase(word) {
+    _normalCaseWord = StrLowerCase(word)
+
+    _firstLetter = _normalCaseWord.slice(0, 1)
+    _capitalizedFirstLetter = StrUpperCase(_firstLetter)
+    _normalWord = _capitalizedFirstLetter + _normalCaseWord.slice(1)
+
+    return _normalWord
+}
