@@ -20,6 +20,7 @@
  * @description КАСТОМИЗАЦИЯ - email всегда кликабельный и приведён к нижнему регистру
  * @description КАСТОМИЗАЦИЯ - дата рождения больше не отрезается слева на 5 символов
  * @description КАСТОМИЗАЦИЯ - org_id теперь возвращает название партнёра, используя метод библиотеки
+ * @description КАСТОМИЗАЦИЯ - position_parent_name теперь возвращает "Центр поддержки ресторанов" для офисных сотрудников
  * @author AZ
  * @param {string} [sDisplayFields] - Отображаемые поля
  * @param {boolean} bEmailAsLink - Если установлен, возвращать e-mail как <a href="mailto:...
@@ -136,7 +137,11 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 			oRes.array.push( { id: teCollaborator.id.Value, name: 'position_name', title: ms_tools.get_const( 'c_position' ), value: teCollaborator.position_name.Value } );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'position_parent_name' " ) != undefined )
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'position_parent_name', title: ms_tools.get_const( 'c_subd' ), value: teCollaborator.position_parent_name.Value } );
+			oRes.array.push( { id: teCollaborator.id.Value, name: 'position_parent_name', title: ms_tools.get_const( 'c_subd' ), 
+				value: 
+				teCollaborator.position_parent_name.Value == "RSC (Restaurants Support Center)" || 
+				teCollaborator.position_parent_name.Value == "FZ_RSC (Restaurants Support Center)" ? 
+				"Центр поддержки ресторанов" : teCollaborator.position_parent_name.Value } );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'org_name' " ) != undefined )
 			oRes.array.push( { id: teCollaborator.id.Value, name: 'org_name', title: ms_tools.get_const( 'c_org' ), value: tools.call_code_library_method("get_data_for_lpe", "getPartnerName", [teCollaborator.id.Value]) } );
