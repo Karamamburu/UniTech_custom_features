@@ -21,6 +21,7 @@
  * @description КАСТОМИЗАЦИЯ - дата рождения больше не отрезается слева на 5 символов
  * @description КАСТОМИЗАЦИЯ - org_id теперь возвращает название партнёра, используя метод библиотеки
  * @description КАСТОМИЗАЦИЯ - position_parent_name теперь возвращает "Центр поддержки ресторанов" для офисных сотрудников
+ * @description КАСТОМИЗАЦИЯ - position_name теперь возвращает русскоязычные должности для сотрудников ресторанов
  * @author AZ
  * @param {string} [sDisplayFields] - Отображаемые поля
  * @param {boolean} bEmailAsLink - Если установлен, возвращать e-mail как <a href="mailto:...
@@ -77,7 +78,11 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 			else
 				sValue = '';
 	
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'login', title: ms_tools.get_const( 'uf_login' ), value: sValue } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'login', 
+				title: ms_tools.get_const( 'uf_login' ), 
+				value: sValue } );
 		}
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'sex' " ) != undefined )
@@ -87,7 +92,11 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 			else
 				sValue = '';
 
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'sex', title: ms_tools.get_const( 'vpb_sex' ), value: sValue } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'sex', 
+				title: ms_tools.get_const( 'vpb_sex' ), 
+				value: sValue } );
 		}
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'birth_date' " ) != undefined )
@@ -99,7 +108,11 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 			else
 				sValue = '';
 
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'birth_date', title: ms_tools.get_const( 'vpb_birthday' ), value: sValue } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'birth_date', 
+				title: ms_tools.get_const( 'vpb_birthday' ), 
+				value: sValue } );
 		}
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'work_address' " ) != undefined )
@@ -124,27 +137,68 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 
 			sValue = ( sPlaceName != '' ? sPlaceName + ( sRegionName != '' ? ( ', ' + sRegionName ) : '' ) : sRegionName );
 
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'work_address', title: i18n.t( 'rabochiyadres' ), value: sValue } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'work_address', 
+				title: i18n.t( 'rabochiyadres' ), 
+				value: sValue } );
 		}
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'email' " ) != undefined )
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'email', title: ms_tools.get_const( 'uf_email' ), value: '<a href="mailto:'+ StrLowerCase(teCollaborator.email.Value) +'">'+ StrLowerCase(teCollaborator.email.Value) +'</a>' } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'email', 
+				title: ms_tools.get_const( 'uf_email' ), 
+				value: '<a href="mailto:'+ StrLowerCase(teCollaborator.email.Value) +'">'+ StrLowerCase(teCollaborator.email.Value) +'</a>' 
+			} );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'phone' " ) != undefined )
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'phone', title: ms_tools.get_const( 'uf_phone' ), value: teCollaborator.phone.Value } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'phone', 
+				title: ms_tools.get_const( 'uf_phone' ), 
+				value: teCollaborator.phone.Value } );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'position_name' " ) != undefined )
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'position_name', title: ms_tools.get_const( 'c_position' ), value: teCollaborator.position_name.Value } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'position_name', 
+				title: ms_tools.get_const( 'c_position' ), 
+				value: 
+					(teCollaborator.position_name.Value == "FOH TM" ||
+					teCollaborator.position_name.Value == "MOH TM" ||
+					teCollaborator.position_name.Value == "BOH TM" ||
+					teCollaborator.position_name.Value == "Team Member") ? "Член команды" : 
+					teCollaborator.position_name.Value == "Team Trainer" ? "Тренер" : 
+					teCollaborator.position_name.Value == "Shift Supervisor" ? "Менеджер смены" :
+					teCollaborator.position_name.Value == "Assistant Manager" ? "Заместитель директора ресторана" :
+					teCollaborator.position_name.Value == "RGM" ? "Директор ресторана" :
+					teCollaborator.position_name.Value == "RGM Trainee" ? "Директор ресторана (стажер)" :
+					teCollaborator.position_name.Value == "Area Coach" ? "Территориальный управляющий" :
+					(teCollaborator.position_name.Value == "Region Coach" ||
+					teCollaborator.position_name.Value == "Market Coach" ||
+					teCollaborator.position_name.Value == "Market Manager") ? "Управляющий операционной деятельностью региона" :
+					teCollaborator.position_name.Value
+			} );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'position_parent_name' " ) != undefined )
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'position_parent_name', title: ms_tools.get_const( 'c_subd' ), 
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'position_parent_name', 
+				title: ms_tools.get_const( 'c_subd' ), 
 				value: 
-				teCollaborator.position_parent_name.Value == "RSC (Restaurants Support Center)" || 
-				teCollaborator.position_parent_name.Value == "FZ_RSC (Restaurants Support Center)" ? 
-				"Центр поддержки ресторанов" : teCollaborator.position_parent_name.Value } );
+					(teCollaborator.position_parent_name.Value == "RSC (Restaurants Support Center)" || 
+					teCollaborator.position_parent_name.Value == "FZ_RSC (Restaurants Support Center)") ? "Центр поддержки ресторанов" : 
+					teCollaborator.position_parent_name.Value 
+			} );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'org_name' " ) != undefined )
-			oRes.array.push( { id: teCollaborator.id.Value, name: 'org_name', title: ms_tools.get_const( 'c_org' ), value: tools.call_code_library_method("get_data_for_lpe", "getPartnerName", [teCollaborator.id.Value]) } );
+			oRes.array.push( { 
+				id: teCollaborator.id.Value, 
+				name: 'org_name', 
+				title: ms_tools.get_const( 'c_org' ), 
+				value: tools.call_code_library_method("get_data_for_lpe", "getPartnerName", [teCollaborator.id.Value]) 
+			} );
 	}
 	catch( ex )
 	{
