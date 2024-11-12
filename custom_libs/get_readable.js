@@ -21,47 +21,31 @@ function getReadableFullDate(date) {
     return _readableFullDate
 }
 
-function getReadableShortName(fullname) {
-    _lowerCaseFullname = StrLowerCase(fullname)
-    _fullnameArray = _lowerCaseFullname.split(" ")
-    _newFullnameArray = []
+function normalizeString(word) {
+	_lowerCaseWord = StrLowerCase(word);
+	_wordWithoutApostrof = StrReplace(_lowerCaseWord, "'", "");
+	_firstLetter = _wordWithoutApostrof.slice(0, 1);
+	_capitalizedFirstLetter = StrUpperCase(_firstLetter);
 
-    for (string in _fullnameArray) {
-        _firstLetter = string.slice(0, 1)
-        _capitalizedFirstLetter = StrUpperCase(_firstLetter)
-        _newString = _capitalizedFirstLetter + string.slice(1)
-        _newFullnameArray.push(_newString)
-    }
-
-    _name = _newFullnameArray[1]
-    _lastName = _newFullnameArray[0]
-    _readableShortName = _name + " " + _lastName 
-
-return _readableShortName
+	return _capitalizedFirstLetter + _wordWithoutApostrof.slice(1);
 }
 
-function getOnlyName(fullname) {
-	_newFullnameArray = []
+function getReadableShortName(fullname) {
+
 	_fullnameArray = fullname.split(" ")
+	_newFullnameArray = []
 
 	for (string in _fullnameArray) {
-		_firstLetter = string.slice(0, 1)
-		_capitalizedFirstLetter = StrUpperCase(_firstLetter)
-		_newString = _capitalizedFirstLetter + string.slice(1)
-		_newFullnameArray.push(_newString)
+		_newFullnameArray.push(normalizeString(string))
 	}
 
 	_name = _newFullnameArray[1]
+	_lastName = _newFullnameArray[0]
+	_readableShortName = _name + " " + _lastName 
 
-    return _name
+	return _readableShortName
 }
 
-function convertNameToNormalCase(word) {
-    _normalCaseWord = StrLowerCase(word)
-
-    _firstLetter = _normalCaseWord.slice(0, 1)
-    _capitalizedFirstLetter = StrUpperCase(_firstLetter)
-    _normalWord = _capitalizedFirstLetter + _normalCaseWord.slice(1)
-
-    return _normalWord
+function getOnlyName(fullname) {
+    return getReadableShortName(fullname).split(" ")[0]
 }
