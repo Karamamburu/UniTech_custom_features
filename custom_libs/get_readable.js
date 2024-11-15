@@ -1,24 +1,25 @@
-function getReadableShortDate(date) {
-    _monthsArray = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-
-    _day = Day(date)
-    _month = Month(date)
-    _monthName = _monthsArray[_month - 1]; 
-    _readableShortDate = _day + " " + _monthName
-
-    return _readableShortDate
+function getDataFromConstants(lib, method, param) {
+    _data = tools.call_code_library_method(lib, method, [param])
+    return _data
 }
 
 function getReadableFullDate(date) {
-    _monthsArray = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-
     _day = Day(date)
     _month = Month(date)
     _year = Year(date)
+    _monthsArray = getDataFromConstants("get_constants", "getMonthsArray")
     _monthName = _monthsArray[_month - 1]; 
     _readableFullDate = _day + " " + _monthName + " " + _year + " года"
 
     return _readableFullDate
+}
+
+function getReadableShortDate(date) {
+    _fullDate = getReadableFullDate(date)
+    _fullDateArray = _fullDate.split(" ")
+    _readableShortDate = _fullDateArray[0] + " " +  _fullDateArray[1]
+
+    return _readableShortDate
 }
 
 function normalizeString(word) {
@@ -31,8 +32,8 @@ function normalizeString(word) {
 }
 
 function getReadableShortName(fullname) {
-
-	_fullnameArray = fullname.split(" ")
+	_fullnameStr = '' + fullname
+	_fullnameArray = _fullnameStr.split(" ")
 	_newFullnameArray = []
 
 	for (string in _fullnameArray) {
@@ -48,4 +49,12 @@ function getReadableShortName(fullname) {
 
 function getOnlyName(fullname) {
     return getReadableShortName(fullname).split(" ")[0]
+}
+
+function getOnlyCyrillicName(fullname) {
+    _name = getOnlyName(fullname)
+    _namesMapObject = getDataFromConstants("get_constants", "getNamesMapObject")
+    _cyrillicName = _namesMapObject.HasProperty(_name) ? _namesMapObject[_name] : _name
+
+    return _cyrillicName
 }

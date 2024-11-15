@@ -7,7 +7,7 @@ function Log(message, ex) {
 }
 
 function normalizeName(name) {
-	_normalName = tools.call_code_library_method('get_readable', 'convertNameToNormalCase', [name])
+	_normalName = tools.call_code_library_method('get_readable', 'normalizeString', [name])
 	return _normalName
 }
 
@@ -48,6 +48,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 
 } else {
 	Log("Именинников сегодня: " + ArrayCount(birthdayCollaborators));
+	Log("Сегодня день рождения отмечают:")
 	var colsArray = []
 
 	for (col in birthdayCollaborators) {
