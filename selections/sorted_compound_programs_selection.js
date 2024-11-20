@@ -16,6 +16,9 @@ COLUMNS = [
 	{ data: "link", type: "string", title: "Ссылка" },
 	{ data: "pict_url", type: "string", title: "Изображение" },
 	{ data: "priority", type: "integer", title: "Номер по порядку" },
+	{ data: "language", type: "string", title: "Язык" },
+	{ data: "dep_type", type: "string", title: "Тип департамента" },
+	{ data: "position", type: "string", title: "Уровень должности" },
 ]
 
 RESULT = new Array();
@@ -40,6 +43,9 @@ for (ListElem in compProgs) {
 
 	CPDoc = tools.open_doc(CPData.id)
 	CPData.priority =  OptInt(CPDoc.TopElem.custom_elems.ObtainChildByKey("priority").value);
+	CPData.language =  CPDoc.TopElem.custom_elems.ObtainChildByKey("language").value;
+	CPData.dep_type =  CPDoc.TopElem.custom_elems.ObtainChildByKey("dep_type").value;
+	CPData.position =  CPDoc.TopElem.custom_elems.ObtainChildByKey("position").value;
 
 }
 
