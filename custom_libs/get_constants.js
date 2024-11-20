@@ -252,6 +252,7 @@ function getNamesMapObject() {
 		Vitalii: "Виталий",
 		Vlada: "Влада",
 		Vladimir: "Владимир",
+		Vladislav: "Владислав",
 		Vlas: "Влас",
 		Volodya: "Володя",
 		Vova: "Вова",
@@ -279,6 +280,18 @@ function getNamesMapObject() {
 	};
 }
 
-function getMonthsArray () {
+function getMonthsArray() {
 	return _monthsArray = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"]
+}
+
+function getEducationPlanStateName() {
+	return _educationPlanStateName = {
+        0: "Назначен",
+        1: "В процессе",
+        2: "Завершён",
+        3: "Не пройден",
+        4: "Пройден",
+		5: "Просмотрен",
+        6: "Отменён"
+    };
 }
