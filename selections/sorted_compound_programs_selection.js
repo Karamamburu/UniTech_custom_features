@@ -1,5 +1,10 @@
 var query = "sql:
-			SELECT id, code, name FROM compound_programs
+			SELECT 
+				cp.id AS id, 
+				cp.code AS code, 
+				cp.name AS name,
+				cp.resource_id AS pict_url
+			FROM compound_programs cp
 "
 
 var compProgs = XQuery(query)
@@ -22,7 +27,7 @@ for (ListElem in compProgs) {
 
 	CPElement = ListElem.Child("id");
 	CPData.id = CPElement.Value;
-	CPData.link = "/wt/" + CPElement.Value;
+	CPData.link = "/_wt/" + CPElement.Value;
 
 	CPElement = ListElem.Child("code");
 	CPData.code = CPElement.Value;
@@ -30,8 +35,10 @@ for (ListElem in compProgs) {
 	CPElement = ListElem.Child("name");
 	CPData.name = CPElement.HasValue ? CPElement.Value : null;
 
+	CPElement = ListElem.Child("pict_url");
+	CPData.pict_url = CPElement.HasValue ? "download_file.html?file_id=" + CPElement.Value : null;
+
 	CPDoc = tools.open_doc(CPData.id)
-	CPData.pict_url = CPDoc.TopElem.resource_id.HasValue ? "download_file.html?file_id=" + CPDoc.TopElem.resource_id.Value : null;
 	CPData.priority =  CPDoc.TopElem.custom_elems.ObtainChildByKey("priority").value;
 
 }
