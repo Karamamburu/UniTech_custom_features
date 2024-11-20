@@ -39,7 +39,7 @@ for (ListElem in compProgs) {
 	CPData.pict_url = CPElement.HasValue ? "download_file.html?file_id=" + CPElement.Value : null;
 
 	CPDoc = tools.open_doc(CPData.id)
-	CPData.priority =  CPDoc.TopElem.custom_elems.ObtainChildByKey("priority").value;
+	CPData.priority =  OptInt(CPDoc.TopElem.custom_elems.ObtainChildByKey("priority").value);
 
 }
 
