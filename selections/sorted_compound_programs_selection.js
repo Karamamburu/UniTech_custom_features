@@ -1,28 +1,28 @@
 var query = "sql:
-			SELECT 
-				cp.id AS id, 
-				cp.code AS code, 
-				cp.name AS name,
-				cp.resource_id AS pict_url,
-				ep.state_id AS state_id
-			FROM compound_programs cp
-			LEFT JOIN education_plans ep ON ep.compound_program_id = cp.id
-			WHERE ep.person_id = 7138424178183920544"
+				SELECT 
+					cp.id, 
+					cp.code, 
+					cp.name,
+					cp.resource_id AS pict_url,
+					ep_aggr.state_id
+				FROM 
+					compound_programs cp
+				LEFT JOIN (
+					SELECT 
+						compound_program_id, 
+						MIN(state_id) AS state_id
+					FROM 
+						education_plans
+					WHERE 
+						person_id = " + curUserID + "
+					GROUP BY 
+						compound_program_id
+				) ep_aggr ON ep_aggr.compound_program_id = cp.id;
+"
 
 var compProgs = XQuery(query)
 
-//Когда библиотека раскэшируется и толстая админка заработает - подключить
-//stateNames = tools.call_code_library_method("get_constants", "getEducationPlanStateName", []);
-
-stateNames = {
-        0: "Назначен",
-        1: "В процессе",
-        2: "Завершён",
-        3: "Не пройден",
-        4: "Пройден",
-	5: "Просмотрен",
-        6: "Отменён"
-    };
+stateNames = tools.call_code_library_method("get_constants", "getEducationPlanStateName", []);
 
 COLUMNS = [
 	{ data: "id", type: "integer", title: "ID" },
