@@ -122,7 +122,7 @@ div[wt-state="idle"] .wt-radio-btn {
 }
 
 div[wt-state="selected"] .wt-radio-btn {
-	border: 3px solid #FF0000;
+	border: 1px solid #FF0000;
 }
 
 
@@ -151,8 +151,54 @@ div[wt-state="selected"] .wt-radio-btn {
 	background-image: url("https://academy.uni.rest/download_file.html?file_id=7395190345570344229") !important; 
 }
 
+.wt-appr-c-block-cell {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto;
+    align-items: center;
+    background-color: white;
+    margin: 1rem 0 0 0;
+  }
 
+  .wt-appr-i-row-title {
+    grid-column: 1 / 2;
+  }
 
+  .wt-appr-c-block-row-control {
+    grid-column: 3 / 4;
+    justify-self: end;
+  }
+  
+  .wt-appr-i-row-comment {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 1rem;
+  }
+
+  textarea[wt-role="indicator-comment"] {
+    width: 95%;
+    min-height: 80px;
+    padding: 0.8rem 2.4rem 0.8rem 0.8rem;
+    border: 1px solid #dbdcdf;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.5;
+    resize: vertical; 
+    background-color: #f9f9fb;
+    color: #333;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  textarea[wt-role="indicator-comment"]:focus {
+    border-color: #FF0000;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+    outline: none;
+  }
+
+  .wt-radio-item .wt-radio-btn {
+	box-sizing: border-box !important;
+}
 
 @media (max-width: 500px) {
 	
@@ -251,7 +297,6 @@ div[wt-state="selected"] .wt-radio-btn {
 
 	.wt-appr-c-block-row-control {
 		margin-right: 50px;
-		width: 25%;
 	}
 
 	tbody[wt-role="uc-comp-body"] {
