@@ -21,21 +21,30 @@ var queryBirthdayCollaborators = "sql:
 							'RGM Trainee', 'Area Coach', 'Region Coach', 'Market Coach')
 			
 "
-
-var birthdayCols = XQuery(queryBirthdayCollaborators)
+Log(tools.call_code_library_method("get_readable", "getReadableShortName", ["Khmyrov Denis"]));
+var birthdayCols = ArraySelectAll(XQuery(queryBirthdayCollaborators))
 
 if (!ArrayCount(birthdayCols)) {
 	Log("сегодня именинников в ресторанах нет")
 
 } else {
 	Log("Именинников в ресторанах сегодня: " + ArrayCount(birthdayCols));
+	Log("Поздравления получили:")
 
 	for (col in birthdayCols) {
-		tools.create_notification("personal_birthday_notification_type", col.id)
+		try {
 
-		Log("Поздравления получили:")
-		Log(tools.call_code_library_method('get_readable', 'getReadableShortName', [col.fullname]) + 
-		" из ресторана " + col.position_parent_name);
+			tools.create_notification("personal_birthday_notification_type", col.id)
+
+			Log(tools.call_code_library_method("get_readable", "getReadableShortName", ['' + col.fullname]) + 
+				" из ресторана " + col.position_parent_name + ", компания " + 
+				tools.call_code_library_method("get_data_for_lpe", "getPartnerName", [col.id]));
+			
+		} catch(ex) {
+			Log("Произошла ошибка: " + ", Error: " + err.message)
+		}
+
+		
 	}
 
 }
