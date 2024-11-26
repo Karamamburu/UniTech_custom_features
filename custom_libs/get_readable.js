@@ -21,14 +21,25 @@ function getReadableShortDate(date) {
 
     return _readableShortDate
 }
+function getWordWithoutFirstLetter(word) {
+	_lettersArray = StrToCharArray(word)
+	_wordWithoutFirstLetter = new Array()
+
+	for (i = 1; i < ArrayCount(_lettersArray); i++) {
+		_wordWithoutFirstLetter.push(_lettersArray[i])
+	}
+	
+	return ArrayMerge(_wordWithoutFirstLetter, "This")
+}
 
 function normalizeString(word) {
 	_lowerCaseWord = StrLowerCase(word);
 	_wordWithoutApostrof = StrReplace(_lowerCaseWord, "'", "");
-	_firstLetter = _wordWithoutApostrof.slice(0, 1);
-	_capitalizedFirstLetter = StrUpperCase(_firstLetter);
+	_wordArray = StrToCharArray(_wordWithoutApostrof)
+	_firstLetter = _wordArray[0]
+	_capitalFirstLetter = StrUpperCase(_firstLetter)
 
-	return _capitalizedFirstLetter + _wordWithoutApostrof.slice(1);
+	return _capitalFirstLetter + getWordWithoutFirstLetter(_lowerCaseWord)
 }
 
 function getReadableShortName(fullname) {
