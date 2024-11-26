@@ -43,7 +43,7 @@ try {
           " AND gms.id IS NULL AND ISNULL(cls.is_dismiss, 0) = 0 ";
 
         if (Param.group_id) {
-          queryColobarators = queryColobarators + " AND cls.id IN (SELECT collaborator_id FROM group_collaborators WHERE group_id = " +OptInt(Param.group_id)  + " )";
+          queryColobarators = queryColobarators + " AND cls.id IN (SELECT collaborator_id FROM group_collaborators WHERE group_id = " + OptInt(Param.group_id) + ") AND cls.id NOT IN (SELECT collaborator_id FROM group_collaborators WHERE group_id = " + OptInt(Param.exceptions_group_id) + ")";
         }
 
         arrColoboratorsToCreateGoalMaps = ArraySelectAll(XQuery(queryColobarators));
