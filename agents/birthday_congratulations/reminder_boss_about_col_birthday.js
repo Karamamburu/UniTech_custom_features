@@ -10,6 +10,8 @@ EnableLog(Param.log_file_name, true);
 
 Log("Начало работы агента");
 
+GetReadable = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js"));
+
 var queryBirthdayInfo = "sql:
 					SELECT 
 						fm.person_id AS boss_id,
@@ -29,9 +31,7 @@ var queryBirthdayInfo = "sql:
 "
 
 var birthdayInfo = ArraySelectAll(XQuery(queryBirthdayInfo))
-Log("Количество именинников " + 
-tools.call_code_library_method('get_readable', 'getReadableShortDate', [birthdayInfo[0].birth_date]) + 
-": " + ArrayCount(birthdayInfo)
+Log("Количество именинников " + GetReadable.getReadableShortDate(birthdayInfo[0].birth_date) + ": " + ArrayCount(birthdayInfo)
 )
 
 if (!ArrayCount(birthdayInfo)) {
@@ -41,8 +41,8 @@ if (!ArrayCount(birthdayInfo)) {
 	
 	for (object in birthdayInfo) {
 
-		_colName = tools.call_code_library_method('get_readable', 'getReadableShortName', [object.col_name])
-		_bossName = tools.call_code_library_method('get_readable', 'getReadableShortName', [object.boss_name])
+		_colName = GetReadable.getReadableShortName(object.col_name)
+		_bossName = GetReadable.getReadableShortName(object.boss_name)
 		Log("Именинник: " + _colName)
 		Log("Его руководитель: " + _bossName)
 
