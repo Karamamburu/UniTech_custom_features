@@ -21,7 +21,7 @@ var queryBirthdayCollaborators = "sql:
 							'RGM Trainee', 'Area Coach', 'Region Coach', 'Market Coach')
 			
 "
-Log(tools.call_code_library_method("get_readable", "getReadableShortName", ["Khmyrov Denis"]));
+
 var birthdayCols = ArraySelectAll(XQuery(queryBirthdayCollaborators))
 
 if (!ArrayCount(birthdayCols)) {

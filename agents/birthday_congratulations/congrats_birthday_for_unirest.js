@@ -6,14 +6,11 @@ function Log(message, ex) {
     }
 }
 
-function normalizeName(name) {
-	_normalName = tools.call_code_library_method('get_readable', 'normalizeString', [name])
-	return _normalName
-}
-
 EnableLog(Param.log_file_name, true);
 
 Log("Начало работы агента");
+
+GetReadable = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js"));
 
 //ищем сотрудников subdivision_corporate_rsc и корпоративных директоров, у которых сегодня день рождения
 var queryBirthdayCollaborators = "sql: 
@@ -39,7 +36,6 @@ var queryBirthdayCollaborators = "sql:
 							AND bt.position_name IN ('RGM', 'RGM Trainee')
 "
 
-
 var birthdayCollaborators = ArraySelectAll(XQuery(queryBirthdayCollaborators))
 
 if(!ArrayCount(birthdayCollaborators)) {
@@ -49,12 +45,12 @@ if(!ArrayCount(birthdayCollaborators)) {
 } else {
 	Log("Именинников сегодня: " + ArrayCount(birthdayCollaborators));
 	Log("Сегодня день рождения отмечают:")
-	var colsArray = []
+	var colsArray = new Array()
 
 	for (col in birthdayCollaborators) {
 
 		_teColDoc = tools.open_doc(col.id).TopElem
-		_normalizedName = normalizeName(_teColDoc.firstname) + " " + normalizeName(_teColDoc.lastname)
+		_normalizedName = GetReadable.normalizeString(_teColDoc.firstname) + " " + GetReadable.normalizeString(_teColDoc.lastname)
 
 		_colShortName = "<p style='font-size: 1em; padding: 0; margin: 0;'>" + _normalizedName + "</p>";
 		_colPositionName = "<p style='font-size: 0.5em; font-weight: normal; margin: 0;'>" + _teColDoc.position_name + "</p></br style='margin=0.2em;'>"
@@ -77,7 +73,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 		"</style>"
 
         var congratulationText0 = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>Сегодня, <b>" + 
-		tools.call_code_library_method('get_readable', 'getReadableShortDate', [Date()]) + "</b>, " + 
+		GetReadable.getReadableShortDate(Date()) + "</b>, " + 
 		(birthdayCollaborators.length == 1 ? "отмечает свой День Рождения" : "отмечают свой День Рождения:") + 
 		"<br/></p>"
 
