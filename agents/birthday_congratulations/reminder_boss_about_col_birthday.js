@@ -31,13 +31,14 @@ var queryBirthdayInfo = "sql:
 "
 
 var birthdayInfo = ArraySelectAll(XQuery(queryBirthdayInfo))
-Log("Количество именинников " + GetReadable.getReadableShortDate(birthdayInfo[0].birth_date) + ": " + ArrayCount(birthdayInfo)
-)
 
 if (!ArrayCount(birthdayInfo)) {
-	Log("сегодня уведомлять некого")
+	
+	Log("Через " + Param.days_before_birthday + " дня никто не празднует день рождения")
 
 } else {
+
+	Log("Количество именинников через " + Param.days_before_birthday + " дня, то есть " + GetReadable.getReadableShortDate(birthdayInfo[0].birth_date) + ": " + ArrayCount(birthdayInfo))
 	
 	for (object in birthdayInfo) {
 
