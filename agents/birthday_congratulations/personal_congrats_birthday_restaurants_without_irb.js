@@ -16,18 +16,19 @@ var queryBirthdayCollaborators = "sql:
 			AND DAY(c.birth_date) = DAY(GETDATE())
 			AND MONTH(c.birth_date) = MONTH(GETDATE())
 			AND c.is_dismiss = 0
-			AND c.position_name IN ('FOH TM', 'MOH TM', 'BOH TM', 'Team Trainer', 
+			AND c.position_name IN ('FOH TM', 'MOH TM', 'BOH TM', 'Team Member', 'Team Trainer', 
 							'Shift Supervisor', 'Assistant Manager', 'RGM', 
-							'RGM Trainee', 'Area Coach', 'Region Coach', 'Market Coach')
-			
+							'RGM Trainee', 'Area Coach', 'Region Coach', 'Market Coach')	
 "
 
 var birthdayCols = ArraySelectAll(XQuery(queryBirthdayCollaborators))
 
 if (!ArrayCount(birthdayCols)) {
+	
 	Log("сегодня именинников в ресторанах нет")
 
 } else {
+
 	Log("Именинников в ресторанах сегодня: " + ArrayCount(birthdayCols));
 	Log("Поздравления получили:")
 
@@ -36,7 +37,7 @@ if (!ArrayCount(birthdayCols)) {
 
 			tools.create_notification("personal_birthday_notification_type", col.id)
 
-			Log(tools.call_code_library_method("get_readable", "getReadableShortName", ['' + col.fullname]) + 
+			Log(tools.call_code_library_method("get_readable", "getReadableShortName", [col.fullname]) + 
 				" из ресторана " + col.position_parent_name + ", компания " + 
 				tools.call_code_library_method("get_data_for_lpe", "getPartnerName", [col.id]));
 			
