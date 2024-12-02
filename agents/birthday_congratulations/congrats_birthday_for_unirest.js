@@ -72,7 +72,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 		"}" +
 		"</style>"
 
-        var congratulationText0 = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>Сегодня, <b>" + 
+        var preTextWithDate = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>Сегодня, <b>" + 
 		GetReadable.getReadableShortDate(Date()) + "</b>, " + 
 		(birthdayCollaborators.length == 1 ? "отмечает свой День Рождения" : "отмечают свой День Рождения:") + 
 		"<br/></p>"
@@ -81,7 +81,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 		"от&nbsp;всей команды&nbsp;Rostics, желаем развиваться&nbsp;лично и&nbsp;профессионально, " + 
 		"ставить перед&nbsp;собой смелые&nbsp;цели, добиваться крутых&nbsp;результатов и&nbsp;жить&nbsp;полной, насыщенной&nbsp;жизнью!</p>"
 
-	var fullText = congratulationText0 + birthdaysColsBlock + congratulationText
+	var fullText = preTextWithDate + birthdaysColsBlock + congratulationText
 
 	//находим сотрудников, которым отправить уведомление
 	var groupToSendNotificationId = Int(Param.group_id)
