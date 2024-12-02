@@ -83,8 +83,7 @@
     var data = tools.read_object(Text, "json");
     var target_url = UrlAppendPath( global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + data.goalmapId);
 
-    var colName = tools.call_code_library_method('get_readable', 'getOnlyName', [data.workerFio])
-}
+    var colName = tools.call_code_library_method('get_readable', 'getOnlyCyrillicName', [data.workerFio])
 %>
     cellpadding="0"
     cellspacing="0"
@@ -361,7 +360,7 @@
                                 font-size: 20px;
                               "
                             >
-                            Рады видеть тебя в нашей команде!<br>
+                            Настало время планировать цели на 2025 год!<br>
                             Одними из ключевых этапов годового цикла работы сотрудников в нашей компании являются процессы постановки целей и подведения итогов года, которые реализованы в нашей HR-системе Академия.<br>
                             Тебе нужно сформулировать свои годовые цели (или на испытательный срок) и отправить на согласование своему руководителю. Внести все формулировки целей можно, заполнив форму "Мои цели и результаты".<br>
                             Перейти к заполнению твоей формы целей ты можешь, нажав на кнопку
