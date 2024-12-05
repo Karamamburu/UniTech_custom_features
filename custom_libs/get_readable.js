@@ -69,3 +69,16 @@ function getOnlyCyrillicName(fullname) {
 
     return _cyrillicName
 }
+
+function getReadablePositionName(id) {
+	_colDoc = tools.open_doc(id)
+	_positionName = _colDoc.TopElem.position_name
+	_positionNamesMapObject = getDataFromConstants("get_constants", "getPositionNamesMapObject")
+	
+	_readablePositionName = _colDoc.TopElem.custom_elems.ObtainChildByKey('pos_name_ru').value ?
+		_colDoc.TopElem.custom_elems.ObtainChildByKey('pos_name_ru').value :
+		_positionNamesMapObject.HasProperty(_positionName) ? _positionNamesMapObject[_positionName] :
+		    _positionName
+
+	return _readablePositionName
+}
