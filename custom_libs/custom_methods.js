@@ -166,7 +166,7 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 				id: teCollaborator.id.Value, 
 				name: 'position_name', 
 				title: ms_tools.get_const( 'c_position' ), 
-				value: GetReadable.getReadablePositionName(teCollaborator.position_name.Value)
+				value: GetReadable.getReadablePositionName(teCollaborator.id.Value)
 			} );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'position_parent_name' " ) != undefined )
@@ -174,7 +174,7 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 				id: teCollaborator.id.Value, 
 				name: 'position_parent_name', 
 				title: ms_tools.get_const( 'c_subd' ), 
-				value: GetReadable.getReadablePositionParentName(teCollaborator.position_parent_name.Value)
+				value: GetReadable.getReadablePositionParentName(teCollaborator.id.Value)
 			} );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'org_name' " ) != undefined )
