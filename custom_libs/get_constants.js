@@ -514,3 +514,18 @@ function getPositionParentNamesMapObject() {
 		"Без департамента": "Центр поддержки ресторанов"
 	};
 }
+
+/**
+ * 
+ * @param {string} departmentCode - идентификатор департамента
+ * @param {string} additionalText - дополнительный текст
+ * @returns {string} описание роли
+ */
+function getPositionNameDescription(departmentCode, additionalText) {
+	if (departmentCode = 'HR') {
+		return _positionNameDescription = "любой текст про HR" + additionalText
+	}
+	if (departmentCode = 'IT') {
+		return _positionNameDescription = additionalText + "любой текст про ИТ"
+	}
+}
