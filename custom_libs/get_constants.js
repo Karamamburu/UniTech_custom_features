@@ -485,3 +485,47 @@ function getEducationPlanStateName() {
         6: "Отменён"
     };
 }
+
+function getPositionNamesMapObject() {
+	return _positionNamesMap = {
+		"FOH TM": "Член команды",
+		"MOH TM": "Член команды",
+		"BOH TM": "Член команды",
+		"Team Member": "Член команды",
+		"Team Trainer": "Тренер",
+		"Shift Supervisor": "Менеджер смены",
+		"Assistant Manager": "Заместитель директора ресторана",
+		"RGM": "Директор ресторана",
+		"RGM Trainee": "Директор ресторана (стажер)",
+		"Area Coach": "Территориальный управляющий",
+		"Region Coach": "Управляющий операционной деятельностью региона",
+		"Market Coach": "Управляющий операционной деятельностью региона",
+		"Market Manager": "Управляющий операционной деятельностью региона",
+		"Key Operator": "Операционный директор",
+		"Other": "Сотрудник центра поддержки ресторанов",
+		"ROCC": "Сотрудник центра поддержки ресторанов"
+	};
+}
+
+function getPositionParentNamesMapObject() {
+	return _positionParentNamesMap = {
+		"RSC (Restaurants Support Center)": "Центр поддержки ресторанов",
+		"FZ_RSC (Restaurants Support Center)": "Центр поддержки ресторанов",
+		"Без департамента": "Центр поддержки ресторанов"
+	};
+}
+
+/**
+ * 
+ * @param {string} departmentCode - идентификатор департамента
+ * @param {string} additionalText - дополнительный текст
+ * @returns {string} описание роли
+ */
+function getPositionNameDescription(departmentCode, additionalText) {
+	if (departmentCode = 'HR') {
+		return _positionNameDescription = "любой текст про HR" + additionalText
+	}
+	if (departmentCode = 'IT') {
+		return _positionNameDescription = additionalText + "любой текст про ИТ"
+	}
+}

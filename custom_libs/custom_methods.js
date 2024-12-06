@@ -36,6 +36,8 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 	oRes.result = true;
 	oRes.array = [];
 
+	GetReadable = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js"));
+
 	try
 	{
 		iCurUserID = Int( iCurUserID );
@@ -103,7 +105,7 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 		{
 			if ( tools_web.is_true( teCollaborator.disp_birthdate ) && teCollaborator.birth_date.HasValue )
 			{
-				sValue = tools.call_code_library_method("get_readable", "getReadableShortDate", [teCollaborator.birth_date.Value]);
+				sValue = GetReadable.getReadableShortDate(teCollaborator.birth_date.Value);
 			}
 			else
 				sValue = '';
@@ -164,21 +166,7 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 				id: teCollaborator.id.Value, 
 				name: 'position_name', 
 				title: ms_tools.get_const( 'c_position' ), 
-				value: 
-					(teCollaborator.position_name.Value == "FOH TM" ||
-					teCollaborator.position_name.Value == "MOH TM" ||
-					teCollaborator.position_name.Value == "BOH TM" ||
-					teCollaborator.position_name.Value == "Team Member") ? "Член команды" : 
-					teCollaborator.position_name.Value == "Team Trainer" ? "Тренер" : 
-					teCollaborator.position_name.Value == "Shift Supervisor" ? "Менеджер смены" :
-					teCollaborator.position_name.Value == "Assistant Manager" ? "Заместитель директора ресторана" :
-					teCollaborator.position_name.Value == "RGM" ? "Директор ресторана" :
-					teCollaborator.position_name.Value == "RGM Trainee" ? "Директор ресторана (стажер)" :
-					teCollaborator.position_name.Value == "Area Coach" ? "Территориальный управляющий" :
-					(teCollaborator.position_name.Value == "Region Coach" ||
-					teCollaborator.position_name.Value == "Market Coach" ||
-					teCollaborator.position_name.Value == "Market Manager") ? "Управляющий операционной деятельностью региона" :
-					teCollaborator.position_name.Value
+				value: GetReadable.getReadablePositionName(teCollaborator.id.Value)
 			} );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'position_parent_name' " ) != undefined )
@@ -186,10 +174,7 @@ function customGetEmployeePersonalData( iCurUserID, sDisplayFields, bEmailAsLink
 				id: teCollaborator.id.Value, 
 				name: 'position_parent_name', 
 				title: ms_tools.get_const( 'c_subd' ), 
-				value: 
-					(teCollaborator.position_parent_name.Value == "RSC (Restaurants Support Center)" || 
-					teCollaborator.position_parent_name.Value == "FZ_RSC (Restaurants Support Center)") ? "Центр поддержки ресторанов" : 
-					teCollaborator.position_parent_name.Value 
+				value: GetReadable.getReadablePositionParentName(teCollaborator.id.Value)
 			} );
 
 		if ( ArrayOptFind( arrDisplayFields, "This == 'org_name' " ) != undefined )

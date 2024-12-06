@@ -69,3 +69,31 @@ function getOnlyCyrillicName(fullname) {
 
     return _cyrillicName
 }
+
+function getReadablePositionName(id) {
+	_colDoc = tools.open_doc(id)
+	_positionName = _colDoc.TopElem.position_name
+	_positionNamesMapObject = getDataFromConstants("get_constants", "getPositionNamesMapObject")
+
+	_readablePositionName = _colDoc.TopElem.custom_elems.ObtainChildByKey('pos_name_ru').value ?
+		_colDoc.TopElem.custom_elems.ObtainChildByKey('pos_name_ru').value :
+		_positionNamesMapObject.HasProperty(_positionName) ? _positionNamesMapObject[_positionName] :
+		    _positionName
+
+	return _readablePositionName
+}
+
+function getReadablePositionParentName(id) {
+	_positionParentNamesMapObject = getDataFromConstants("get_constants", "getPositionParentNamesMapObject")
+	_positionParentNameQuery = "sql:
+					SELECT c.position_parent_name
+					FROM collaborators c
+					WHERE c.id = " + id
+	
+	_positionParentName = ArrayOptFirstElem(ArraySelectAll(XQuery(_positionParentNameQuery))).position_parent_name
+
+	_readablePositionParentName = _positionParentNamesMapObject.HasProperty(_positionParentName) ? _positionParentNamesMapObject[_positionParentName] :
+	    _positionParentName
+	
+	return _readablePositionParentName
+}
