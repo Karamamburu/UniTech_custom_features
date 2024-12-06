@@ -27,13 +27,13 @@ var queryBirthdayInfo = "sql:
 						= CONVERT(DATE, DATEADD(DAY, " + Param.days_before_birthday + ", GETDATE()))
 					AND c.is_dismiss = 0
 					AND c.position_name IN ('RGM', 'RGM Trainee', 'Area Coach', 'Region Coach', 
-							'Market Coach', 'RSC', 'RSC Contractor')
+							'Market Coach', 'RSC', 'RSC Contractor', 'Other')
 "
 
 var birthdayInfo = ArraySelectAll(XQuery(queryBirthdayInfo))
-
+Log(tools.object_to_text(birthdayInfo, "json"))
 if (!ArrayCount(birthdayInfo)) {
-	
+
 	Log("Через " + Param.days_before_birthday + " дня никто не празднует день рождения")
 
 } else {
@@ -46,7 +46,7 @@ if (!ArrayCount(birthdayInfo)) {
 		_bossName = GetReadable.getReadableShortName(object.boss_name)
 		Log("Именинник: " + _colName)
 		Log("Его руководитель: " + _bossName)
-
+		Log("_________")
 		_readableShortName = "<div style='padding: 4px; margin-top: 8px;'><b>" + 
 			_colName + 
 			"</b></div>" + 
@@ -63,11 +63,11 @@ if (!ArrayCount(birthdayInfo)) {
 
 		_notificationText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
 			"отмечает свой День рождения!<br>
-			Одна из наших ценностей – Командная работа, и День рождения – отличный повод признать вклад именинника в общее дело. Поздравь своего коллегу от всей команды Rostics!</p>"
+			Одна из наших ценностей – Командная работа, и День рождения – отличный повод признать вклад именинника в общее дело. Поздравь своего коллегу от всей команды Rostic's!</p>"
 
 		_fullText = _dateText + "<br>" + _readableShortName + "<br>" + _notificationText
 //чтобы отправить боссу, в следующей строке просто передать boss_id вторым агрументом
-		tools.create_notification("boss_birthday_notification_type", 7138424178183920544, _fullText)
+		//tools.create_notification("boss_birthday_notification_type", 7138424178183920544, _fullText)
 	}
 
 }

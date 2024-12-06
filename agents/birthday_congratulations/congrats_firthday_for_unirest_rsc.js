@@ -21,6 +21,8 @@ var queryBirthdayCollaborators = "sql:
 							AND MONTH(birth_date) = MONTH(GETDATE()) 
 							AND is_dismiss = 0
 							AND LEN(login) = 7
+							AND email LIKE '%@uni.rest'
+							AND email NOT IN ('ru-bosstest@uni.rest')
                             				)
 							SELECT bt.id
 							FROM birth_today bt
@@ -81,7 +83,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 
 	var congratulationText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
 		"от&nbsp;всей команды&nbsp;Rostics желаем развиваться&nbsp;лично и&nbsp;профессионально, " + 
-		"ставить перед&nbsp;собой смелые&nbsp;цели, добиваться крутых&nbsp;результатов и&nbsp;жить&nbsp;полной, насыщенной&nbsp;жизнью!</p>"
+		"ставить перед&nbsp;собой смелые&nbsp;цели, добиваться прорывных&nbsp;результатов и&nbsp;жить&nbsp;полной, насыщенной&nbsp;жизнью!</p>"
 
 	var fullText = preTextWithDate + birthdaysColsBlock + congratulationText
 
