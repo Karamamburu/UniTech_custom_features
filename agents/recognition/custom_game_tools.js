@@ -11,6 +11,25 @@ function isNullOrEmpty(value) {
     }
     return false;
 }
+/**
+ * @description Метод получения информации по пользователе по ID
+ * @function getCollaboratorInfo
+ * @param {bigint} collaborator_id 
+ * @returns {object}
+ */
+function getCollaboratorInfo(collaborator_id) {
+    return ArrayOptFirstElem(XQuery("sql: SELECT * FROM collaborators WHERE id = " + collaborator_id), {});
+}
+
+/**
+ * @description Метод получения информации о квалификации
+ * @function getQualificationInfo
+ * @param {bigint} qualification_id 
+ * @returns {object}
+ */
+function getQualificationInfo(qualification_id) {
+    return ArrayOptFirstElem(XQuery("sql: SELECT * FROM qualifications WHERE id = " + qualification_id), {});
+}
 
 /** 
  *  @typedef {object} trans_ids
@@ -152,7 +171,7 @@ function topUpAcceptanceAccountIn(recipientId, amount, senderId, transactionCode
  * @param {bigint} amount - сумма перевода.
  * @param {string} sendName - ФИО пользователя отправителя.
  */
-function notificationAccountReplenishment(col_id, amount, sendName) {
+function notificationAccountReplenishment(col_id, amount, sendName, acceptance_id) {
     collTe = tools.open_doc(col_id).TopElem;
     if (collTe.position_name == "Area Coach" || collTe.position_name == "Region Coach" || collTe.position_name == "Market Coach" || 
         collTe.position_name == "RSC" || collTe.position_name == "RSC Contractor" || collTe.position_name == "Key Operator" || 
@@ -160,11 +179,12 @@ function notificationAccountReplenishment(col_id, amount, sendName) {
         tools.create_notification("accept_acceptance", col_id);
     }
     _notification_doc = tools.new_doc_by_name('cc_notification', false);
-	_notification_doc.TopElem.object_id = col_id;
-	_notification_doc.TopElem.object_type = 'collaborator';
+	_notification_doc.TopElem.object_id = acceptance_id;
+	_notification_doc.TopElem.object_type = 'acceptance';
 	_notification_doc.TopElem.collaborator_id = col_id;
 	_notification_doc.TopElem.description = 'Тебе пришло признание от ' + sendName;
-	_notification_doc.TopElem.is_info = true;
+	_notification_doc.TopElem.is_info = false;
+    _notification_doc.TopElem.link = '_wt/gamification';
 	_notification_doc.BindToDb();
 	_notification_doc.Save();
 }
@@ -177,13 +197,14 @@ function notificationAccountReplenishment(col_id, amount, sendName) {
  * @param {string} sendName - ФИО пользователя отправителя.
  * @param {string} qualificationName - наименование квалификации.
  */
-function notificationAssignementQualification(col_id, sendName, qualificationName) {
+function notificationAssignementQualification(col_id, sendName, qualificationName, assign_qualification_id) {
     _notification_doc = tools.new_doc_by_name('cc_notification', false);
-	_notification_doc.TopElem.object_id = col_id;
-	_notification_doc.TopElem.object_type = 'collaborator';
+	_notification_doc.TopElem.object_id = assign_qualification_id;
+	_notification_doc.TopElem.object_type = 'assign_qualification';
 	_notification_doc.TopElem.collaborator_id = col_id;
 	_notification_doc.TopElem.description = sendName + " выдал вам награду '"+ qualificationName +"' ";
-	_notification_doc.TopElem.is_info = true;
+	_notification_doc.TopElem.is_info = false;
+    _notification_doc.TopElem.link = '_wt/gamification';
 	_notification_doc.BindToDb();
 	_notification_doc.Save();
 }
@@ -196,70 +217,65 @@ function notificationAssignementQualification(col_id, sendName, qualificationNam
  * @param {bigint} icon_id - ID уведомления.
  * @param {string} icon_name - наименование квалификации.
  */
-function notificationAssignementIcon(col_id, icon_id, icon_name, sendName) {
+function notificationAssignementIcon(col_id, icon_id, icon_name, sendName, assign_icon_id) {
     _notification_doc = tools.new_doc_by_name('cc_notification', false);
-	_notification_doc.TopElem.object_id = icon_id;
-	_notification_doc.TopElem.object_type = 'icon';
+	_notification_doc.TopElem.object_id = assign_icon_id;
+	_notification_doc.TopElem.object_type = 'assign_icon';
 	_notification_doc.TopElem.collaborator_id = col_id;
 	_notification_doc.TopElem.description = " Вы получили значок '"+ icon_name +"' от " + sendName;
-	_notification_doc.TopElem.is_info = true;
+	_notification_doc.TopElem.is_info = false;
+    _notification_doc.TopElem.link = '_wt/gamification';
 	_notification_doc.BindToDb();
 	_notification_doc.Save();
 }
 
 /**
- * @function giveAcceptanceToUsers
+ * @function giveAcceptanceToUser
  * @memberof UniRest
  * @description Отправка признания сотруднику.
- * @param {Object} acceptance - Информация о признании.
- * @param {bigint[]} acceptance.recipient_ids - массив ID сотрудников-получателей.
- * @param {bigint} acceptance.sender_id - ID сотрудника-отправителя.
- * @param {bool} acceptance.is_personal - является личным.
- * @param {int} acceptance.amount - количество.
- * @param {bigint} acceptance.resource_id - ID ресурса базы.
- * @param {string} acceptance.description - текст описания.
+ * @param {bigint} recipient_id - ID сотрудника-получателя.
+ * @param {bigint} sender_id - ID сотрудника-отправителя.
+ * @param {bool} is_personal - является личным.
+ * @param {int} amount - количество.
+ * @param {bigint} resource_id - ID ресурса базы.
+ * @param {string} description - текст описания.
  * @returns {Object} result
  * @returns {boolean} result.success - статус операции.
  * @returns {string[]} result.description список исключений.
  */
-function giveAcceptanceToUsers(acceptance) {
-    result = {
-        success: true,
-        description: []
-    }
-
-    balance = ArrayOptFirstElem(XQuery("sql: SELECT balance FROM accounts WHERE object_type = 'collaborator' AND object_id = " + acceptance.sender_id + " AND code =  'acceptance_account_out' "), {balance: 0}).balance;
-    if (acceptance.recipient_ids.length * acceptance.amount > balance) {
-        throw 'There are not enough funds on the account, sender_id = ' + acceptance.sender_id;
-    }
-
-    for (recipient_id in acceptance.recipient_ids) {
-        create_date = ArrayOptFirstElem(XQuery("sql: SELECT create_date FROM cc_acceptances WHERE recipient_id = " + recipient_id + " AND sender_id = " + acceptance.sender_id + " ORDER BY create_date DESC"), {create_date: Date('01.01.1970 00:00:00')}).create_date;
-        if ((DateDiff(Date(), Date(create_date))/(60*60*24)) > 30) {
-            sendFullname = ArrayOptFirstElem(XQuery("sql: SELECT fullname FROM collaborators WHERE id = " + acceptance.sender_id), {fullname:''}).fullname;
-            trans_ids = topUpAcceptanceAccountIn(recipient_id, acceptance.amount, acceptance.sender_id);
-            notificationAccountReplenishment(recipient_id, acceptance.amount, sendFullname);
-            
-            _acceptance_doc = tools.new_doc_by_name('cc_acceptance', false);
-            _acceptance_doc.TopElem.name = 'Признание - ' + sendFullname + ' - ' + Date();
-            _acceptance_doc.TopElem.recipient_id = recipient_id;
-            _acceptance_doc.TopElem.sender_id = acceptance.sender_id;
-            _acceptance_doc.TopElem.in_transaction_id = trans_ids.coming; 
-            _acceptance_doc.TopElem.out_transaction_id = trans_ids.expense;
-            _acceptance_doc.TopElem.resource_id = acceptance.resource_id;
-            _acceptance_doc.TopElem.description = acceptance.description;
-            _acceptance_doc.TopElem.is_personal = acceptance.is_personal ? true : false;
-            _acceptance_doc.TopElem.create_date = Date();
-            _acceptance_doc.TopElem.new_entry = true;
-            _acceptance_doc.BindToDb();
-	        _acceptance_doc.Save();
-        } else {
-            result.success = false;
-            result.description.push("Пользователю уже был перевод в течение 30 дней: collaborator_id = " + recipient_id);
+function giveAcceptanceToUser(recipient_id, sender_id, amount, resource_id, description, is_personal) {
+    if (amount != 0) {
+        var balance = ArrayOptFirstElem(XQuery("sql: SELECT balance FROM accounts WHERE object_type = 'collaborator' AND object_id = " + sender_id + " AND code =  'acceptance_account_out' "), {balance: 0}).balance;
+        if (amount > balance) {
+            throw 'Недостаточно признаний';
+        }
+    
+        create_date = ArrayOptFirstElem(XQuery("sql: SELECT create_date FROM cc_acceptances WHERE recipient_id = " + recipient_id + " AND sender_id = " + sender_id + " ORDER BY create_date DESC"), {create_date: Date('01.01.1970 00:00:00')}).create_date;
+        if ((DateDiff(Date(), Date(create_date))/(60*60*24)) <= 30) {
+            throw 'Пользователю уже было отправлено признание за последние 30 дней.';
         }
     }
 
-    return result;
+    var collaborator_info = getCollaboratorInfo(sender_id);
+    var trans_ids = topUpAcceptanceAccountIn(recipient_id, amount, sender_id);
+    
+    _acceptance_doc = tools.new_doc_by_name('cc_acceptance', false);
+    _acceptance_doc.TopElem.name = 'Признание - ' + collaborator_info.GetOptProperty('fullname', '') + ' - ' + Date();
+    _acceptance_doc.TopElem.recipient_id = recipient_id;
+    _acceptance_doc.TopElem.sender_id = sender_id;
+    _acceptance_doc.TopElem.in_transaction_id = trans_ids.coming; 
+    _acceptance_doc.TopElem.out_transaction_id = trans_ids.expense;
+    _acceptance_doc.TopElem.resource_id = resource_id;
+    _acceptance_doc.TopElem.description = description;
+    _acceptance_doc.TopElem.is_personal = is_personal;
+    _acceptance_doc.TopElem.create_date = Date();
+    _acceptance_doc.TopElem.new_entry = true;
+    _acceptance_doc.BindToDb();
+    _acceptance_doc.Save();
+
+    notificationAccountReplenishment(recipient_id, amount, collaborator_info.GetOptProperty('fullname', ''), _acceptance_doc.DocID);
+    
+    return _acceptance_doc;
 }
 
 /**
@@ -276,7 +292,7 @@ function giveIconToUser(recipientId, iconId, senderId) {
     " WHERE collaborator_id = " + OptInt(recipientId, 0) + " AND icon_id = " + iconId;
 
     if (ArrayOptFirstElem(XQuery(query)) != undefined) {
-        throw "Collaborator '" + recipientId + "' already has an icon_id = " + iconId;
+        throw "У пользователя уже есть такой значок. ";
     }
 
     assign_icon_doc = tools.new_doc_by_name("cc_assign_icon", false);
@@ -293,7 +309,7 @@ function giveIconToUser(recipientId, iconId, senderId) {
     icon_info = tools.open_doc(iconId);
     if (!isNull(icon_info)) {
         sender_fullname = ArrayOptFirstElem(XQuery("sql: SELECT * FROM collaborators WHERE id = " + senderId), {fullname: ''}).fullname;
-        notificationAssignementIcon(recipientId, iconId, icon_info.TopElem.name, sender_fullname);
+        notificationAssignementIcon(recipientId, iconId, icon_info.TopElem.name, sender_fullname, assign_icon_doc.DocID);
     }
 
     assign_icon_doc.Save();
@@ -310,16 +326,17 @@ function giveIconToUser(recipientId, iconId, senderId) {
 function giveTrophyToUser(recipientId, qualificationId, senderId) {
     senderData = ArrayOptFirstElem(XQuery("sql: SELECT fullname name, position_name FROM collaborators WHERE id = " + senderId));
     if (isNull(senderData)) {
-        throw 'The employee was not found, sender_id = ' + senderId;
+        throw 'Выбранный пользователь не найден.';
     }
 
     amount_award = ArrayOptFirstElem(XQuery("sql: SELECT cost FROM cc_acceptance_trophy_costs WHERE position_name = '" + senderData.position_name +"'"), {cost:0}).cost
     if (amount_award == 0) {
-        throw "The award for the assignment of qualifications for the position was not found '"+ senderData.position_name +"', qualificationId = " + qualificationId;
+        var qualification_info = getQualificationInfo(qualificationId);
+        throw "Не указано количество признаний за присвоение награды по должности отправителя. Наименование должности отправителя: '" + senderData.position_name +"', наименование квалификации: " + qualification_info.GetOptProperty('name', '');
     }
 
     if (ArrayOptFirstElem(XQuery("sql: SELECT id FROM qualification_assignments WHERE person_id = "+ recipientId +" AND qualification_id = "+ qualificationId)) != undefined) {
-        throw "The reward has already been received, collaborator_id = " + recipientId + ", qualification_id = " + qualificationId;
+        throw "Награда была получена ранее";
     }
 
     docAssignQual = tools.assign_qualification_to_person(recipientId, null, qualificationId,  DateNewTime(Date()), null, [], [], false, false, false, false, true)
@@ -338,7 +355,7 @@ function giveTrophyToUser(recipientId, qualificationId, senderId) {
         docAssignQual.Save();
     }
     senderData.name = senderData.name ? senderData.name: 'Не определено';
-    notificationAssignementQualification(recipientId, senderData.name, ArrayOptFirstElem(XQuery("sql: SELECT name FROM qualifications WHERE id = " + qualificationId),{name:'Не задано'}).name);
+    notificationAssignementQualification(recipientId, senderData.name, ArrayOptFirstElem(XQuery("sql: SELECT name FROM qualifications WHERE id = " + qualificationId),{name:'Не задано'}).name, docAssignQual.DocID);
 }
 
 /**

@@ -23,6 +23,11 @@ var queryBirthdayCollaborators = "sql:
 							AND LEN(login) = 7
 							AND email LIKE '%@uni.rest'
 							AND email NOT IN ('ru-bosstest@uni.rest')
+							AND id NOT IN (
+								SELECT collaborator_id 
+								FROM group_collaborators
+								WHERE group_id = " + Param.birthday_guys_exception_group_id + "
+								)
                             				)
 							SELECT bt.id
 							FROM birth_today bt
@@ -56,8 +61,8 @@ if(!ArrayCount(birthdayCollaborators)) {
 		_normalizedName = GetReadable.normalizeString(_teColDoc.firstname) + " " + GetReadable.normalizeString(_teColDoc.lastname)
 		_colPositionName = _teColDoc.custom_elems.ObtainChildByKey('pos_name_ru').value ? _teColDoc.custom_elems.ObtainChildByKey('pos_name_ru').value : _teColDoc.position_name
 
-		_colShortNameTag = "<p style='font-size: 1em; padding: 0; margin: 0;'>" + _normalizedName + "</p>";
-		_colPositionNameTag = "<p style='font-size: 0.5em; font-weight: normal; margin: 0;'>" + _colPositionName + "</p></br style='margin=0.2em;'>"
+		_colShortNameTag = "<p style='font-size: 0.75em; padding: 0; margin:0;'>" + _normalizedName + "</p>";
+		_colPositionNameTag = "<p style='font-size: 0.35em; font-weight: normal; margin: 0;'>" + _colPositionName + "</p>"
 
 		Log(_normalizedName + " - " + _colPositionName)
 
@@ -67,7 +72,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 	}
 
 	//собираем разметку сообщения из двух блоков
-	var birthdaysColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
+	var birthdaysColsBlock = "<div style='padding: 4px; margin-top: 4px;'>" + 
 		colsArray.join(" ") + 
 		"</div>" + 
 		"<style>" +
@@ -76,14 +81,14 @@ if(!ArrayCount(birthdayCollaborators)) {
 		"}" +
 		"</style>"
 
-        var preTextWithDate = "<p style='font-weight: normal; font-size: 0.6em; margin: -50px 0 30px 0; '>Сегодня, <b>" + 
+        var preTextWithDate = "<p style='font-weight: normal; font-size: 0.6em; margin: 0.25em 0 0.5em 0; '>Сегодня, <b>" + 
 		GetReadable.getReadableShortDate(Date()) + "</b>, " + 
 		(birthdayCollaborators.length == 1 ? "отмечает свой День Рождения" : "отмечают свой День Рождения:") + 
-		"<br/></p>"
+		"</p>"
 
-	var congratulationText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
-		"от&nbsp;всей команды&nbsp;Rostics желаем развиваться&nbsp;лично и&nbsp;профессионально, " + 
-		"ставить перед&nbsp;собой смелые&nbsp;цели, добиваться прорывных&nbsp;результатов и&nbsp;жить&nbsp;полной, насыщенной&nbsp;жизнью!</p>"
+	var congratulationText = "<p style='font-weight: normal; font-size: 0.5em; margin: 1em 0 0.5em 0; '>" + 
+		"от&nbsp;всей команды&nbsp;Rostics желаем развиваться лично и&nbsp;профессионально, " + 
+		"ставить перед&nbsp;собой смелые&nbsp;цели, добиваться прорывных&nbsp;результатов и&nbsp;жить полной, насыщенной&nbsp;жизнью!</p>"
 
 	var fullText = preTextWithDate + birthdaysColsBlock + congratulationText
 
