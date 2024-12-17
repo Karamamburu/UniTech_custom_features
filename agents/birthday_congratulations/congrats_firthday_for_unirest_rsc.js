@@ -59,8 +59,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 
 		_teColDoc = tools.open_doc(col.id).TopElem
 		_normalizedName = GetReadable.normalizeString(_teColDoc.firstname) + " " + GetReadable.normalizeString(_teColDoc.lastname)
-		_colPositionName = _teColDoc.custom_elems.ObtainChildByKey('pos_name_ru').value ? _teColDoc.custom_elems.ObtainChildByKey('pos_name_ru').value : _teColDoc.position_name
-
+		_colPositionName = GetReadable.getReadablePositionName(col.id)
 		_colShortNameTag = "<p style='font-size: 0.75em; padding: 0; margin:0;'>" + _normalizedName + "</p>";
 		_colPositionNameTag = "<p style='font-size: 0.35em; font-weight: normal; margin: 0;'>" + _colPositionName + "</p>"
 
