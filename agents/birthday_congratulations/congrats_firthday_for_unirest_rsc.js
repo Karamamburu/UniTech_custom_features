@@ -86,7 +86,7 @@ if(!ArrayCount(birthdayCollaborators)) {
 		"</p>"
 
 	var congratulationText = "<p style='font-weight: normal; font-size: 0.5em; margin: 1em 0 0.5em 0; '>" + 
-		"от&nbsp;всей команды&nbsp;Rostics желаем развиваться лично и&nbsp;профессионально, " + 
+		"от&nbsp;всей команды&nbsp;Rostic's желаем развиваться лично и&nbsp;профессионально, " + 
 		"ставить перед&nbsp;собой смелые&nbsp;цели, добиваться прорывных&nbsp;результатов и&nbsp;жить полной, насыщенной&nbsp;жизнью!</p>"
 
 	var fullText = preTextWithDate + birthdaysColsBlock + congratulationText
