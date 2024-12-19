@@ -12,18 +12,18 @@ Log("начало работы агента");
 var CustomGameTools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_game_tools.js"));
 
 var queryCollaborators = "sql:
-					SELECT 
-						id, 
-						fullname, 
-						position_id,
-						position_name,
-						position_parent_id,
-						position_parent_name,
-						org_id,
-						org_name
-					FROM collaborators
-					WHERE position_parent_id = " + Param.restaurant_id + " 
-					AND is_dismiss = 0
+							SELECT 
+								id, 
+								fullname, 
+								position_id,
+								position_name,
+								position_parent_id,
+								position_parent_name,
+								org_id,
+								org_name
+							FROM collaborators
+							WHERE position_parent_id = " + Param.restaurant_id + " 
+							AND is_dismiss = 0
 "
 
 var colsToAssignRewards = ArraySelectAll(XQuery(queryCollaborators))
@@ -47,7 +47,6 @@ if (!ArrayCount(colsToAssignRewards)) {
 			}	
 		}	
 	}
-
 
 Log("завершение работы агента");
 EnableLog(Param.log_file_name, false);

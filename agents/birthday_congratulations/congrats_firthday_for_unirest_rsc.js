@@ -17,7 +17,7 @@ var queryBirthdayCollaborators = "sql:
 						WITH birth_today AS (
 							SELECT id, fullname, position_parent_id, position_name
 							FROM collaborators 
-							WHERE DAY(birth_date) = DAY(GETDATE()) 
+							WHERE DAY(birth_date) = DAY(GETDATE())
 							AND MONTH(birth_date) = MONTH(GETDATE()) 
 							AND is_dismiss = 0
 							AND LEN(login) = 7
@@ -59,7 +59,8 @@ if(!ArrayCount(birthdayCollaborators)) {
 
 		_teColDoc = tools.open_doc(col.id).TopElem
 		_normalizedName = GetReadable.normalizeString(_teColDoc.firstname) + " " + GetReadable.normalizeString(_teColDoc.lastname)
-		_colPositionName = GetReadable.getReadablePositionName(col.id)
+	//костыль с проверками должностей в следующей строке убрать после фикса проблем с получением корректных должностей из ГЕМ
+		_colPositionName = GetReadable.getReadablePositionName(col.id) == "Менеджер смены" ? "Исполнительный директор ресторана" : GetReadable.getReadablePositionName(col.id) == "Заместитель директора ресторана" ? "Директор ресторана" : GetReadable.getReadablePositionName(col.id)
 		_colShortNameTag = "<p style='font-size: 0.75em; padding: 0; margin:0;'>" + _normalizedName + "</p>";
 		_colPositionNameTag = "<p style='font-size: 0.35em; font-weight: normal; margin: 0;'>" + _colPositionName + "</p>"
 

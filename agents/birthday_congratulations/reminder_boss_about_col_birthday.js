@@ -12,6 +12,10 @@ Log("Начало работы агента");
 
 GetReadable = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js"));
 
+var targetDate = tools.AdjustDate(Date(), Param.days_before_birthday)
+var targetDay = Day(targetDate);
+var targetMonth = Month(targetDate);
+
 var queryBirthdayInfo = "sql:
 					SELECT 
 						fm.person_id AS boss_id,
@@ -22,12 +26,16 @@ var queryBirthdayInfo = "sql:
 					LEFT JOIN collaborators c ON c.id = gc.collaborator_id
 					LEFT JOIN func_managers fm ON c.id = fm.object_id
 					WHERE gc.group_id = " + Param.group_id + "
-					AND 
-						CONVERT(DATE, CONCAT(YEAR(GETDATE()), '-', MONTH(c.birth_date), '-', DAY(c.birth_date))) 
-						= CONVERT(DATE, DATEADD(DAY, " + Param.days_before_birthday + ", GETDATE()))
+					AND DAY(c.birth_date) = " + targetDay + " 
+					AND MONTH(c.birth_date) = " + targetMonth + " 
 					AND c.is_dismiss = 0
 					AND c.position_name IN ('RGM', 'RGM Trainee', 'Area Coach', 'Region Coach', 
 							'Market Coach', 'RSC', 'RSC Contractor', 'Other')
+					AND c.id NOT IN (
+						SELECT collaborator_id
+						FROM group_collaborators
+						WHERE group_id = " + Param.exceptions_group_id + "
+					)
 "
 
 var birthdayInfo = ArraySelectAll(XQuery(queryBirthdayInfo))
@@ -60,7 +68,6 @@ if (!ArrayCount(birthdayInfo)) {
 				tools.call_code_library_method('get_readable', 'getReadableShortDate', [object.birth_date]) + 
 				"</b>,"
 				
-
 		_notificationText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
 			"отмечает свой День рождения!<br>
 			Одна из наших ценностей – Командная работа, и День рождения – отличный повод признать вклад именинника в общее дело. Поздравь своего коллегу от всей команды Rostic's!</p>"
