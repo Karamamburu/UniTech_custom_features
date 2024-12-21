@@ -250,10 +250,17 @@ function giveAcceptanceToUser(recipient_id, sender_id, amount, resource_id, desc
             throw 'Недостаточно признаний';
         }
     
-        create_date = ArrayOptFirstElem(XQuery("sql: SELECT create_date FROM cc_acceptances WHERE recipient_id = " + recipient_id + " AND sender_id = " + sender_id + " ORDER BY create_date DESC"), {create_date: Date('01.01.1970 00:00:00')}).create_date;
+        create_date = ArrayOptFirstElem(XQuery("sql:SELECT cas.create_date FROM cc_acceptances cas " + 
+            "JOIN transactions ts ON ts.id = cas.out_transaction_id AND ts.amount != 0 " +
+            "WHERE cas.recipient_id = " + recipient_id + " AND cas.sender_id = " + sender_id +  
+            "ORDER BY cas.create_date DESC"), {create_date: Date('01.01.1970 00:00:00')}).create_date;
         if ((DateDiff(Date(), Date(create_date))/(60*60*24)) <= 30) {
             throw 'Пользователю уже было отправлено признание за последние 30 дней.';
         }
+    }
+
+    if (OptInt(recipient_id) == OptInt(sender_id)) {
+        throw 'Признание нельзя отправить самому себе';
     }
 
     var collaborator_info = getCollaboratorInfo(sender_id);
