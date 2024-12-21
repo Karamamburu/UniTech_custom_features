@@ -43,6 +43,5 @@ if (!ArrayCount(colsToAssignIcons)) {
 	}	
 }
 
-
 Log("завершение работы агента");
 EnableLog(Param.log_file_name, false);

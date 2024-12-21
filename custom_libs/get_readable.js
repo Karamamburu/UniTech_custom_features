@@ -86,14 +86,19 @@ function getReadablePositionName(id) {
 function getReadablePositionParentName(id) {
 	_positionParentNamesMapObject = getDataFromConstants("get_constants", "getPositionParentNamesMapObject")
 	_positionParentNameQuery = "sql:
-					SELECT c.position_parent_name
+					SELECT c.position_parent_id, c.position_parent_name
 					FROM collaborators c
 					WHERE c.id = " + id
 	
+	_positionParentId = ArrayOptFirstElem(ArraySelectAll(XQuery(_positionParentNameQuery))).position_parent_id
 	_positionParentName = ArrayOptFirstElem(ArraySelectAll(XQuery(_positionParentNameQuery))).position_parent_name
+	_subdivDoc = tools.open_doc(_positionParentId)
 
-	_readablePositionParentName = _positionParentNamesMapObject.HasProperty(_positionParentName) ? _positionParentNamesMapObject[_positionParentName] :
-	    _positionParentName
+	_readablePositionParentName = _subdivDoc.TopElem.custom_elems.ObtainChildByKey('name_ru').value ? 
+	_subdivDoc.TopElem.custom_elems.ObtainChildByKey('name_ru').value : 
+		_positionParentNamesMapObject.HasProperty(_positionParentName) ? 
+		_positionParentNamesMapObject[_positionParentName] :
+	    	_positionParentName
 	
 	return _readablePositionParentName
 }
