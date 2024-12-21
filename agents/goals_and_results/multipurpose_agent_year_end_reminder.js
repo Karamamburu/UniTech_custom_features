@@ -1,22 +1,26 @@
 function Log(message, ex) {
-  if(ex == null || ex == undefined) {
-      LogEvent(Param.log_file_name, message);
+  if (ex == null || ex == undefined) {
+    LogEvent(Param.log_file_name, message);
   } else {
-      LogEvent(Param.log_file_name, (message + ' Exception: ' + ex));
+    LogEvent(Param.log_file_name, message + " Exception: " + ex);
   }
 }
 
 EnableLog(Param.log_file_name, true);
 Log("Начало работы агента");
 
-GoalTools = OpenCodeLib(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_goal_tools.js"));
-GetReadable = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js"));
+GoalTools = OpenCodeLib(
+  FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_goal_tools.js")
+);
+GetReadable = OpenCodeLib(
+  FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js")
+);
 
-var colEvaluation = 7283857534769645145
-var colEvaluationRework = 7283857586736733555
-var bossAgreement = 7283857616031667479
-var colAcquaintance = 7378783877013073086
-var finished = 7283857648112835796
+var colEvaluation = 7283857534769645145;
+var colEvaluationRework = 7283857586736733555;
+var bossAgreement = 7283857616031667479;
+var colAcquaintance = 7378783877013073086;
+var finished = 7283857648112835796;
 
 function getNameFromId(id) {
   var query = "sql:
@@ -64,101 +68,157 @@ var goalmapsInfoQuery = "sql:
                                         c.position_name NOT IN ('Area Coach')
 "
 
-var goalmapsInfo = ArraySelectAll(XQuery(goalmapsInfoQuery))
+var goalmapsInfo = ArraySelectAll(XQuery(goalmapsInfoQuery));
 
-if(!ArrayCount(goalmapsInfo)) {
-  Log("Карт целей не найдено")
+if (!ArrayCount(goalmapsInfo)) {
+  Log("Карт целей не найдено");
 } else {
   Log("Найдено карт целей: " + ArrayCount(goalmapsInfo));
 
-  counter = 0
+  counter = 0;
   var bossNotifications = {};
 
   for (goalmap in goalmapsInfo) {
     counter++;
     //Log("Обработка карты целей № " + counter + " с ID: " + goalmap.goalmap_id);
-  
+
     try {
-      if (!goalmap.boss_id || !goalmap.state_id || !goalmap.col_fullname || !goalmap.boss_fullname) {
-        Log("Пропущена обработка из-за отсутствия данных. Данные записи: " + tools.object_to_text(goalmap, 'json'));
+      if (
+        !goalmap.boss_id ||
+        !goalmap.state_id ||
+        !goalmap.col_fullname ||
+        !goalmap.boss_fullname
+      ) {
+        Log(
+          "Пропущена обработка из-за отсутствия данных. Данные записи: " +
+            tools.object_to_text(goalmap, "json")
+        );
         continue;
       }
-  
+
       if (!bossNotifications.HasProperty(goalmap.boss_id)) {
-          bossNotifications[goalmap.boss_id] = {};
-          bossNotifications[goalmap.boss_id].boss_fullname = "" + getNameFromId(goalmap.boss_id)
-          bossNotifications[goalmap.boss_id].colEvaluationAndRework = new Array()
-          bossNotifications[goalmap.boss_id].bossAgreement = new Array()
-          bossNotifications[goalmap.boss_id].colAcquaintance = new Array()
+        bossNotifications[goalmap.boss_id] = {};
+        bossNotifications[goalmap.boss_id].boss_fullname =
+          "" + getNameFromId(goalmap.boss_id);
+        bossNotifications[goalmap.boss_id].colEvaluationAndRework = new Array();
+        bossNotifications[goalmap.boss_id].bossAgreement = new Array();
+        bossNotifications[goalmap.boss_id].colAcquaintance = new Array();
       }
-  //далее идут goalmap.col_id для того, чтобы отправить самим сотрудникам уведомления.
-  //для наглядности можно вывести в лог goalmap.col_fullname
-      if (goalmap.state_id == colEvaluation || goalmap.state_id == colEvaluationRework) {
-        bossNotifications[goalmap.boss_id].colEvaluationAndRework.push("" + goalmap.col_id);
+      //далее идут goalmap.col_id для того, чтобы отправить самим сотрудникам уведомления.
+      //для наглядности можно вывести в лог goalmap.col_fullname
+      if (
+        goalmap.state_id == colEvaluation ||
+        goalmap.state_id == colEvaluationRework
+      ) {
+        bossNotifications[goalmap.boss_id].colEvaluationAndRework.push(
+          "" + goalmap.col_id
+        );
       }
-  
+
       if (goalmap.state_id == bossAgreement) {
-        bossNotifications[goalmap.boss_id].bossAgreement.push("" + goalmap.col_id);
+        bossNotifications[goalmap.boss_id].bossAgreement.push(
+          "" + goalmap.col_id
+        );
       }
-  
+
       if (goalmap.state_id == colAcquaintance) {
-        bossNotifications[goalmap.boss_id].colAcquaintance.push("" + goalmap.col_id);
+        bossNotifications[goalmap.boss_id].colAcquaintance.push(
+          "" + goalmap.col_id
+        );
       }
     } catch (ex) {
-      Log("Ошибка при обработке карты целей № " + counter + " с ID: " + goalmap.goalmap_id + " Exception: " + ex);
+      Log(
+        "Ошибка при обработке карты целей № " +
+          counter +
+          " с ID: " +
+          goalmap.goalmap_id +
+          " Exception: " +
+          ex
+      );
     }
   }
 
-	try {
-		for (boss_id in bossNotifications) {
+  try {
+    for (boss_id in bossNotifications) {
+      if (bossNotifications.HasProperty(boss_id)) {
+        bossData = bossNotifications[boss_id];
+        bossFullname = bossData.boss_fullname;
 
-		  if (bossNotifications.HasProperty(boss_id)) {
-		    bossData = bossNotifications[boss_id];
-		    bossFullname = bossData.boss_fullname;
-
-		    if (ArrayCount(bossData.colEvaluationAndRework)) {
-          namesArray = getNamesArray(bossData.colEvaluationAndRework)
-		      evaluationColsText = namesArray.join(",</br>");
-          Log(GetReadable.getReadableShortName(bossFullname) + " получил уведомление о необходимости напомнить сотруднику об оценке результатов сотрудникам: " + evaluationColsText)
-tools.create_notification("for_boss_employee_evaluation_type", boss_id, evaluationColsText);
+        if (ArrayCount(bossData.colEvaluationAndRework)) {
+          namesArray = getNamesArray(bossData.colEvaluationAndRework);
+          evaluationColsText = namesArray.join(",</br>");
+          Log(
+            GetReadable.getReadableShortName(bossFullname) +
+              " получил уведомление о необходимости напомнить сотруднику об оценке результатов сотрудникам: " +
+              evaluationColsText
+          );
+          tools.create_notification(
+            "for_boss_employee_evaluation_type",
+            boss_id,
+            evaluationColsText
+          );
 
           //здесь col - это id сотрудника для отправки ему письма
           for (col in bossData.colEvaluationAndRework) {
-            Log("Сотрудник " + getNameFromId(col) + " получил уведомление О НЕОБХОДИМОСТИ ЗАПОЛНИТЬ ОЦЕНКУ")
-tools.create_notification("employee_evaluation_type", OptInt(col));
-          }    
+            Log(
+              "Сотрудник " +
+                getNameFromId(col) +
+                " получил уведомление О НЕОБХОДИМОСТИ ЗАПОЛНИТЬ ОЦЕНКУ"
+            );
+            tools.create_notification("employee_evaluation_type", OptInt(col));
+          }
         }
 
-		    if (ArrayCount(bossData.bossAgreement)) {
-          namesArray = getNamesArray(bossData.bossAgreement)
-		      agreementColsText = namesArray.join(",</br>");
-          Log(GetReadable.getReadableShortName(bossFullname) + " получил уведомление о необходимости оценить результаты сотрудникам: " + agreementColsText)
+        if (ArrayCount(bossData.bossAgreement)) {
+          namesArray = getNamesArray(bossData.bossAgreement);
+          agreementColsText = namesArray.join(",</br>");
+          Log(
+            GetReadable.getReadableShortName(bossFullname) +
+              " получил уведомление о необходимости оценить результаты сотрудникам: " +
+              agreementColsText
+          );
 
-tools.create_notification("for_boss_approval_type", boss_id, agreementColsText);
+          tools.create_notification(
+            "for_boss_approval_type",
+            boss_id,
+            agreementColsText
+          );
         }
 
-		    if (ArrayCount(bossData.colAcquaintance)) {
-          namesArray = getNamesArray(bossData.colAcquaintance)
-		      acquaintanceColsText = namesArray.join(",</br>");
-          Log(GetReadable.getReadableShortName(bossFullname) + " получил уведомление о необходимости напомнить сотруднику ознакомиться с оценкой результатов сотрудникам: " + acquaintanceColsText)
+        if (ArrayCount(bossData.colAcquaintance)) {
+          namesArray = getNamesArray(bossData.colAcquaintance);
+          acquaintanceColsText = namesArray.join(",</br>");
+          Log(
+            GetReadable.getReadableShortName(bossFullname) +
+              " получил уведомление о необходимости напомнить сотруднику ознакомиться с оценкой результатов сотрудникам: " +
+              acquaintanceColsText
+          );
 
-tools.create_notification("for_boss_employee_acquaintance_type", boss_id, acquaintanceColsText);
+          tools.create_notification(
+            "for_boss_employee_acquaintance_type",
+            boss_id,
+            acquaintanceColsText
+          );
           //здесь col - это id сотрудника для отправки ему письма
           for (col in bossData.colAcquaintance) {
-            Log("Сотрудник " + getNameFromId(col) + " получил уведомление О НЕОБХОДИМОСТИ ОЗНАКОМИТЬСЯ С ОЦЕНКОЙ РЕЗУЛЬТАТОВ РУКОВОДИТЕЛЕМ")
+            Log(
+              "Сотрудник " +
+                getNameFromId(col) +
+                " получил уведомление О НЕОБХОДИМОСТИ ОЗНАКОМИТЬСЯ С ОЦЕНКОЙ РЕЗУЛЬТАТОВ РУКОВОДИТЕЛЕМ"
+            );
 
-tools.create_notification("employee_acquaintance_type", OptInt(col));
+            tools.create_notification(
+              "employee_acquaintance_type",
+              OptInt(col)
+            );
           }
-		    }
-        
-		  }
-		}
-	    } catch (ex) {
-	      Log("Ошибка : " + ex);
-	    }
-
+        }
+      }
+    }
+  } catch (ex) {
+    Log("Ошибка : " + ex);
   }
-
+}
 
 Log("Окончание работы агента");
 EnableLog(Param.log_file_name, false);
