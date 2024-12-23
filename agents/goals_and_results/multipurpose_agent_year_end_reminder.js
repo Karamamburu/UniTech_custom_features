@@ -139,6 +139,7 @@ if (!ArrayCount(goalmapsInfo)) {
   }
 
   try {
+    notificationsCounter = 0;
     for (boss_id in bossNotifications) {
       if (bossNotifications.HasProperty(boss_id)) {
         bossData = bossNotifications[boss_id];
@@ -152,11 +153,8 @@ if (!ArrayCount(goalmapsInfo)) {
               " получил уведомление о необходимости напомнить сотруднику об оценке результатов сотрудникам: " +
               evaluationColsText
           );
-          tools.create_notification(
-            "for_boss_employee_evaluation_type",
-            boss_id,
-            evaluationColsText
-          );
+          tools.create_notification("for_boss_employee_evaluation_type",boss_id,evaluationColsText);
+          notificationsCounter++
 
           //здесь col - это id сотрудника для отправки ему письма
           for (col in bossData.colEvaluationAndRework) {
@@ -166,6 +164,7 @@ if (!ArrayCount(goalmapsInfo)) {
                 " получил уведомление О НЕОБХОДИМОСТИ ЗАПОЛНИТЬ ОЦЕНКУ"
             );
             tools.create_notification("employee_evaluation_type", OptInt(col));
+            notificationsCounter++
           }
         }
 
@@ -178,11 +177,8 @@ if (!ArrayCount(goalmapsInfo)) {
               agreementColsText
           );
 
-          tools.create_notification(
-            "for_boss_approval_type",
-            boss_id,
-            agreementColsText
-          );
+          tools.create_notification("for_boss_approval_type",boss_id,agreementColsText);
+          notificationsCounter++
         }
 
         if (ArrayCount(bossData.colAcquaintance)) {
@@ -193,12 +189,9 @@ if (!ArrayCount(goalmapsInfo)) {
               " получил уведомление о необходимости напомнить сотруднику ознакомиться с оценкой результатов сотрудникам: " +
               acquaintanceColsText
           );
+          tools.create_notification("for_boss_employee_acquaintance_type",boss_id,acquaintanceColsText);
+          notificationsCounter++
 
-          tools.create_notification(
-            "for_boss_employee_acquaintance_type",
-            boss_id,
-            acquaintanceColsText
-          );
           //здесь col - это id сотрудника для отправки ему письма
           for (col in bossData.colAcquaintance) {
             Log(
@@ -207,14 +200,13 @@ if (!ArrayCount(goalmapsInfo)) {
                 " получил уведомление О НЕОБХОДИМОСТИ ОЗНАКОМИТЬСЯ С ОЦЕНКОЙ РЕЗУЛЬТАТОВ РУКОВОДИТЕЛЕМ"
             );
 
-            tools.create_notification(
-              "employee_acquaintance_type",
-              OptInt(col)
-            );
+            tools.create_notification("employee_acquaintance_type",OptInt(col));
+            notificationsCounter++
           }
         }
       }
     }
+    Log("Отправлено уведомлений: " + notificationsCounter);
   } catch (ex) {
     Log("Ошибка : " + ex);
   }
