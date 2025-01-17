@@ -127,7 +127,7 @@ if (!ArrayCount(goalmapsInfo)) {
       );
     }
   }
-  
+
   for (goalmap in goalmapsInfo) {
     if (
       goalmap.state_id == colSettingGoals ||
@@ -167,6 +167,93 @@ if (!ArrayCount(goalmapsInfo)) {
     }
   }
   Log(tools.object_to_text(oCollaborators, 'json'))
+  var selfGoalsSettingAndReworkBlock = ""
+  var colSettingAndReworkBlock = ""
+  var bossAgreementBlock = ""
+  var colApprovementBlock = ""
+
+  for (col in oCollaborators) {
+    try {
+
+      if (oCollaborators[col].state_id != StrInt(colSettingGoals) &&
+        oCollaborators[col].state_id != StrInt(colSettingGoalsRework) &&
+        !ArrayCount(oCollaborators[col].colSettingAndRework) &&
+        !ArrayCount(oCollaborators[col].bossAgreement) &&
+        !ArrayCount(oCollaborators[col].colFinalApprovement)     
+      ) {
+        Log(oCollaborators[col].col_fullname + " не получил уведомление")
+        continue
+      }
+
+      selfGoalsSettingAndReworkBlock = ""
+      colSettingAndReworkBlock = ""
+      bossAgreementBlock = ""
+      colApprovementBlock = ""
+
+      if (oCollaborators[col].state_id == StrInt(colSettingGoals) || oCollaborators[col].state_id == StrInt(colSettingGoalsRework)) {
+        selfGoalsSettingAndReworkBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
+        "- поставить цели в Академии и отправить их на согласование руководителю" + "</p>"
+      }
+
+      if (ArrayCount(oCollaborators[col].colSettingAndRework)) {
+
+        settingColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
+          oCollaborators[col].colSettingAndRework.join('</br>') + 
+          "</div>" + 
+          "<style>" +
+          "@media (max-width: 600px) {" +
+          "  p { font-size: 0.4em;}" +
+          "}" +
+          "</style>"
+
+        colSettingAndReworkBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
+        "- напомнить поставить цели в Академии и отправить их тебе на согласование: " + 
+        settingColsBlock + 
+        "</p>"
+      }
+
+      if (ArrayCount(oCollaborators[col].bossAgreement)) {
+
+        agreementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
+          oCollaborators[col].bossAgreement.join('</br>') + 
+          "</div>" + 
+          "<style>" +
+          "@media (max-width: 600px) {" +
+          "  p { font-size: 0.4em;}" +
+          "}" +
+          "</style>"
+
+          bossAgreementBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
+        "- согласовать цели сотрудников в Академии: " + 
+        agreementColsBlock + 
+        "</p>"
+      }
+
+      if (ArrayCount(oCollaborators[col].colFinalApprovement)) {
+
+        finalApprovementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
+          oCollaborators[col].colFinalApprovement.join('</br>') + 
+          "</div>" + 
+          "<style>" +
+          "@media (max-width: 600px) {" +
+          "  p { font-size: 0.4em;}" +
+          "}" +
+          "</style>"
+
+          colApprovementBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
+        "- напомнить сотрудникам подтвердить ознакомление с целями в Академии: " + 
+        finalApprovementColsBlock + 
+        "</p>"
+      }
+
+      fullText = selfGoalsSettingAndReworkBlock + colSettingAndReworkBlock + bossAgreementBlock + colApprovementBlock
+      Log(oCollaborators[col].col_fullname + ":" + fullText)
+      
+    } catch (error) {
+      Log("Error TEXT: " + error)
+    } 
+  }
+
 }
 
 Log("Окончание работы агента");
