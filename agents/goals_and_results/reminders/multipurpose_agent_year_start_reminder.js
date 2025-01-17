@@ -9,9 +9,6 @@ function Log(message, ex) {
 EnableLog(Param.log_file_name, true);
 Log("Начало работы агента");
 
-GoalTools = OpenCodeLib(
-  FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_goal_tools.js")
-);
 GetReadable = OpenCodeLib(
   FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js")
 );
@@ -29,24 +26,6 @@ var bossAgreementGoals = 7283857427410994955;
 var colSettingGoalsRework = 7283857459099681927;
 var colFinalApprovement = 7283857504467095538;
 var colEvaluation = 7283857534769645145;
-
-function getNameFromId(id) {
-  var query = "sql:
-                  SELECT fullname FROM collaborators
-                  WHERE id = " + id;
-  var fullnameArray = ArraySelectAll(XQuery(query))
-
-  return GetReadable.getReadableShortName(ArrayOptFirstElem(fullnameArray).fullname)
-}
-
-function getNamesArray(array) {
-  namesArray = new Array
-  for (elem in array) {
-    namesArray.push(GetReadable.getReadableShortName(getNameFromId(OptInt(elem))))
-  }
-  
-  return namesArray
-}
 
 var goalmapsInfoQuery = "sql: 
                                       SELECT 
@@ -108,7 +87,7 @@ if (!ArrayCount(goalmapsInfo)) {
         oCollaborators[goalmap.col_id] = {}
         oCollaborators[goalmap.col_id].col_fullname = "" + goalmap.col_fullname
         oCollaborators[goalmap.col_id].boss_id = "" + goalmap.boss_id
-        oCollaborators[goalmap.col_id].boss_fullname = "" + getNameFromId(goalmap.boss_id)
+        oCollaborators[goalmap.col_id].boss_fullname = "" + goalmap.boss_fullname
         oCollaborators[goalmap.col_id].state_id = "" + goalmap.state_id
         oCollaborators[goalmap.col_id].state_name = "" + stateIdsMapping[goalmap.state_id]
         oCollaborators[goalmap.col_id].colSettingAndRework = new Array()
@@ -253,7 +232,7 @@ if (!ArrayCount(goalmapsInfo)) {
       Log("Error TEXT: " + error)
     } 
   }
-
+  tools.create_notification("employee_evaluation_type", 7138424178183920544);
 }
 
 Log("Окончание работы агента");
