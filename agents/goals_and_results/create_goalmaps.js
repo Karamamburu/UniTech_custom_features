@@ -51,6 +51,7 @@ try {
         for (oColoboratorToCreateGoalMapElem in arrColoboratorsToCreateGoalMaps) {
           goalmap_doc = goal_tools.get_or_create_goalmap_doc(period_doc.DocID, oColoboratorToCreateGoalMapElem.id);
 		  goalmap_doc.TopElem.without_okr = OptInt(Param.without_okr) == 1;
+          goalmap_doc.TopElem.manager_id = tools.get_uni_user_boss(oColoboratorToCreateGoalMapElem.id).id;
 		  goalmap_doc.Save()
           Log('Create new goalmap for collaborator. Year - ' + period_doc.TopElem.year + '. Login - ' + oColoboratorToCreateGoalMapElem.login);
         }
