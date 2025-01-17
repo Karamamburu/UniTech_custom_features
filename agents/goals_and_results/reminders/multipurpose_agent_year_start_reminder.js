@@ -85,7 +85,8 @@ if (!ArrayCount(goalmapsInfo)) {
 
       if (!oCollaborators.HasProperty(goalmap.col_id)) {
         oCollaborators[goalmap.col_id] = {}
-        oCollaborators[goalmap.col_id].col_fullname = "" + goalmap.col_fullname
+        oCollaborators[goalmap.col_id].goalmap_id = "" + goalmap.goalmap_id
+        oCollaborators[goalmap.col_id].col_fullname = "" + GetReadable.getReadableShortName(goalmap.col_fullname)
         oCollaborators[goalmap.col_id].boss_id = "" + goalmap.boss_id
         oCollaborators[goalmap.col_id].boss_fullname = "" + goalmap.boss_fullname
         oCollaborators[goalmap.col_id].state_id = "" + goalmap.state_id
@@ -114,7 +115,7 @@ if (!ArrayCount(goalmapsInfo)) {
     ) {
       try {
         oCollaborators[goalmap.boss_id].colSettingAndRework.push(
-          "" + goalmap.col_fullname
+          "" + GetReadable.getReadableShortName(goalmap.col_fullname)
         );
       } catch (error) {
         Log("Error COL SETTING AND REWORK: " + error)
@@ -126,7 +127,7 @@ if (!ArrayCount(goalmapsInfo)) {
     ) {
       try {
         oCollaborators[goalmap.boss_id].bossAgreement.push(
-          "" + goalmap.col_fullname
+          "" + GetReadable.getReadableShortName(goalmap.col_fullname)
         );
       } catch (error) {
         Log("Error BOSS AGREEMENT: " + error)
@@ -138,7 +139,7 @@ if (!ArrayCount(goalmapsInfo)) {
     ) {
       try {
         oCollaborators[goalmap.boss_id].colFinalApprovement.push(
-          "" + goalmap.col_fullname
+          "" + GetReadable.getReadableShortName(goalmap.col_fullname)
         );
       } catch (error) {
         Log("Error FINAL APPROVEMENT: " + error)
@@ -169,9 +170,12 @@ if (!ArrayCount(goalmapsInfo)) {
       bossAgreementBlock = ""
       colApprovementBlock = ""
 
+      //нужно придумать, где хранить goalmap_id сотрудника, чтобы по клику на него переходить в его карту целей
+      //linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCollaborators[col].goalmap_id);
+
       if (oCollaborators[col].state_id == StrInt(colSettingGoals) || oCollaborators[col].state_id == StrInt(colSettingGoalsRework)) {
-        selfGoalsSettingAndReworkBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
-        "- поставить цели в Академии и отправить их на согласование руководителю" + "</p>"
+        selfGoalsSettingAndReworkBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        "- поставить свои цели и отправить их на согласование руководителю" + "</p>"
       }
 
       if (ArrayCount(oCollaborators[col].colSettingAndRework)) {
@@ -185,8 +189,8 @@ if (!ArrayCount(goalmapsInfo)) {
           "}" +
           "</style>"
 
-        colSettingAndReworkBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
-        "- напомнить поставить цели в Академии и отправить их тебе на согласование: " + 
+        colSettingAndReworkBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        "- напомнить поставить цели и отправить их тебе на согласование " + (ArrayCount(oCollaborators[col].colSettingAndRework) > 1 ? 'сотрудникам: ' : 'сотруднику: ') + 
         settingColsBlock + 
         "</p>"
       }
@@ -202,8 +206,8 @@ if (!ArrayCount(goalmapsInfo)) {
           "}" +
           "</style>"
 
-          bossAgreementBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
-        "- согласовать цели сотрудников в Академии: " + 
+          bossAgreementBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        "- согласовать цели " + (ArrayCount(oCollaborators[col].bossAgreement) > 1 ? 'сотрудникам: ' : 'сотруднику: ') + 
         agreementColsBlock + 
         "</p>"
       }
@@ -219,20 +223,27 @@ if (!ArrayCount(goalmapsInfo)) {
           "}" +
           "</style>"
 
-          colApprovementBlock = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
-        "- напомнить сотрудникам подтвердить ознакомление с целями в Академии: " + 
+          colApprovementBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        "- напомнить подтвердить ознакомление с целями " + (ArrayCount(oCollaborators[col].colFinalApprovement) > 1 ? 'сотрудникам: ' : 'сотруднику: ') + 
         finalApprovementColsBlock + 
         "</p>"
       }
 
       fullText = selfGoalsSettingAndReworkBlock + colSettingAndReworkBlock + bossAgreementBlock + colApprovementBlock
       Log(oCollaborators[col].col_fullname + ":" + fullText)
+
+        if(col == StrInt(7356921955523507709)) {
+          Log("HERE WE'LL SEND THE MESSAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+          tools.create_notification("multipurpose_year_start_reminder_type", 7281405151477773727, fullText)
+
+        }
+
+
       
     } catch (error) {
       Log("Error TEXT: " + error)
     } 
   }
-  tools.create_notification("employee_evaluation_type", 7138424178183920544);
 }
 
 Log("Окончание работы агента");
