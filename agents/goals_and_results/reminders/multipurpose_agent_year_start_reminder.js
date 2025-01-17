@@ -16,11 +16,19 @@ GetReadable = OpenCodeLib(
   FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js")
 );
 
+var stateIdsMapping = {
+  '7283857316660210018': 'colSettingGoals',
+  '7283857427410994955': 'bossAgreementGoals',
+  '7283857459099681927': 'colSettingGoalsRework',
+  '7283857504467095538': 'colFinalApprovement',
+  '7283857534769645145': 'colEvaluation'
+};
+
+var colSettingGoals = 7283857316660210018;
+var bossAgreementGoals = 7283857427410994955;
+var colSettingGoalsRework = 7283857459099681927;
+var colFinalApprovement = 7283857504467095538;
 var colEvaluation = 7283857534769645145;
-var colEvaluationRework = 7283857586736733555;
-var bossAgreement = 7283857616031667479;
-var colAcquaintance = 7378783877013073086;
-var finished = 7283857648112835796;
 
 function getNameFromId(id) {
   var query = "sql:
@@ -57,10 +65,11 @@ var goalmapsInfoQuery = "sql:
                                         gc.group_id = " + Param.group_id +"
                                       AND
                                         gm.state_id IN (" + 
-                                          colEvaluation + ", " + 
-                                          colEvaluationRework + ", " + 
-                                          bossAgreement + ", " + 
-                                          colAcquaintance + 
+                                          colSettingGoals + ", " + 
+                                          bossAgreementGoals + ", " + 
+                                          colSettingGoalsRework + ", " + 
+                                          colFinalApprovement + ", " + 
+                                          colEvaluation + 
                                           ")
                                       AND
                                         gm.period_id = " + Param.period_id + "
@@ -74,9 +83,9 @@ if (!ArrayCount(goalmapsInfo)) {
   Log("Карт целей не найдено");
 } else {
   Log("Найдено карт целей: " + ArrayCount(goalmapsInfo));
-
+  Log(tools.object_to_text(goalmapsInfo, 'json'))
   counter = 0;
-  var bossNotifications = {};
+  var oCollaborators = {};
 
   for (goalmap in goalmapsInfo) {
     counter++;
@@ -86,8 +95,7 @@ if (!ArrayCount(goalmapsInfo)) {
       if (
         !goalmap.boss_id ||
         !goalmap.state_id ||
-        !goalmap.col_fullname ||
-        !goalmap.boss_fullname
+        !goalmap.col_fullname
       ) {
         Log(
           "Пропущена обработка из-за отсутствия данных. Данные записи: " +
@@ -96,36 +104,18 @@ if (!ArrayCount(goalmapsInfo)) {
         continue;
       }
 
-      if (!bossNotifications.HasProperty(goalmap.boss_id)) {
-        bossNotifications[goalmap.boss_id] = {};
-        bossNotifications[goalmap.boss_id].boss_fullname =
-          "" + getNameFromId(goalmap.boss_id);
-        bossNotifications[goalmap.boss_id].colEvaluationAndRework = new Array();
-        bossNotifications[goalmap.boss_id].bossAgreement = new Array();
-        bossNotifications[goalmap.boss_id].colAcquaintance = new Array();
-      }
-      //далее идут goalmap.col_id для того, чтобы отправить самим сотрудникам уведомления.
-      //для наглядности можно вывести в лог goalmap.col_fullname
-      if (
-        goalmap.state_id == colEvaluation ||
-        goalmap.state_id == colEvaluationRework
-      ) {
-        bossNotifications[goalmap.boss_id].colEvaluationAndRework.push(
-          "" + goalmap.col_id
-        );
+      if (!oCollaborators.HasProperty(goalmap.col_id)) {
+        oCollaborators[goalmap.col_id] = {}
+        oCollaborators[goalmap.col_id].col_fullname = "" + goalmap.col_fullname
+        oCollaborators[goalmap.col_id].boss_id = "" + goalmap.boss_id
+        oCollaborators[goalmap.col_id].boss_fullname = "" + getNameFromId(goalmap.boss_id)
+        oCollaborators[goalmap.col_id].state_id = "" + goalmap.state_id
+        oCollaborators[goalmap.col_id].state_name = "" + stateIdsMapping[goalmap.state_id]
+        oCollaborators[goalmap.col_id].colSettingAndRework = new Array()
+        oCollaborators[goalmap.col_id].bossAgreement = new Array()
+        oCollaborators[goalmap.col_id].colFinalApprovement = new Array()
       }
 
-      if (goalmap.state_id == bossAgreement) {
-        bossNotifications[goalmap.boss_id].bossAgreement.push(
-          "" + goalmap.col_id
-        );
-      }
-
-      if (goalmap.state_id == colAcquaintance) {
-        bossNotifications[goalmap.boss_id].colAcquaintance.push(
-          "" + goalmap.col_id
-        );
-      }
     } catch (ex) {
       Log(
         "Ошибка при обработке карты целей № " +
@@ -137,79 +127,46 @@ if (!ArrayCount(goalmapsInfo)) {
       );
     }
   }
-
-  try {
-    notificationsCounter = 0;
-    for (boss_id in bossNotifications) {
-      if (bossNotifications.HasProperty(boss_id)) {
-        bossData = bossNotifications[boss_id];
-        bossFullname = bossData.boss_fullname;
-
-        if (ArrayCount(bossData.colEvaluationAndRework)) {
-          namesArray = getNamesArray(bossData.colEvaluationAndRework);
-          evaluationColsText = namesArray.join(",</br>");
-          Log(
-            GetReadable.getReadableShortName(bossFullname) +
-              " получил уведомление о необходимости напомнить сотруднику об оценке результатов сотрудникам: " +
-              evaluationColsText
-          );
-          tools.create_notification("for_boss_employee_evaluation_type",boss_id,evaluationColsText);
-          notificationsCounter++
-
-          //здесь col - это id сотрудника для отправки ему письма
-          for (col in bossData.colEvaluationAndRework) {
-            Log(
-              "Сотрудник " +
-                getNameFromId(col) +
-                " получил уведомление О НЕОБХОДИМОСТИ ЗАПОЛНИТЬ ОЦЕНКУ"
-            );
-            tools.create_notification("employee_evaluation_type", OptInt(col));
-            notificationsCounter++
-          }
-        }
-
-        if (ArrayCount(bossData.bossAgreement)) {
-          namesArray = getNamesArray(bossData.bossAgreement);
-          agreementColsText = namesArray.join(",</br>");
-          Log(
-            GetReadable.getReadableShortName(bossFullname) +
-              " получил уведомление о необходимости оценить результаты сотрудникам: " +
-              agreementColsText
-          );
-
-          tools.create_notification("for_boss_approval_type",boss_id,agreementColsText);
-          notificationsCounter++
-        }
-
-        if (ArrayCount(bossData.colAcquaintance)) {
-          namesArray = getNamesArray(bossData.colAcquaintance);
-          acquaintanceColsText = namesArray.join(",</br>");
-          Log(
-            GetReadable.getReadableShortName(bossFullname) +
-              " получил уведомление о необходимости напомнить сотруднику ознакомиться с оценкой результатов сотрудникам: " +
-              acquaintanceColsText
-          );
-          tools.create_notification("for_boss_employee_acquaintance_type",boss_id,acquaintanceColsText);
-          notificationsCounter++
-
-          //здесь col - это id сотрудника для отправки ему письма
-          for (col in bossData.colAcquaintance) {
-            Log(
-              "Сотрудник " +
-                getNameFromId(col) +
-                " получил уведомление О НЕОБХОДИМОСТИ ОЗНАКОМИТЬСЯ С ОЦЕНКОЙ РЕЗУЛЬТАТОВ РУКОВОДИТЕЛЕМ"
-            );
-
-            tools.create_notification("employee_acquaintance_type",OptInt(col));
-            notificationsCounter++
-          }
-        }
+  
+  for (goalmap in goalmapsInfo) {
+    if (
+      goalmap.state_id == colSettingGoals ||
+      goalmap.state_id == colSettingGoalsRework
+    ) {
+      try {
+        oCollaborators[goalmap.boss_id].colSettingAndRework.push(
+          "" + goalmap.col_fullname
+        );
+      } catch (error) {
+        Log("Error COL SETTING AND REWORK: " + error)
       }
     }
-    Log("Отправлено уведомлений: " + notificationsCounter);
-  } catch (ex) {
-    Log("Ошибка : " + ex);
+
+    if (
+      goalmap.state_id == bossAgreementGoals
+    ) {
+      try {
+        oCollaborators[goalmap.boss_id].bossAgreement.push(
+          "" + goalmap.col_fullname
+        );
+      } catch (error) {
+        Log("Error BOSS AGREEMENT: " + error)
+      }
+    }
+
+    if (
+      goalmap.state_id == colFinalApprovement
+    ) {
+      try {
+        oCollaborators[goalmap.boss_id].colFinalApprovement.push(
+          "" + goalmap.col_fullname
+        );
+      } catch (error) {
+        Log("Error FINAL APPROVEMENT: " + error)
+      }
+    }
   }
+  Log(tools.object_to_text(oCollaborators, 'json'))
 }
 
 Log("Окончание работы агента");
