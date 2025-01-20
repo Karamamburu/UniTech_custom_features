@@ -35,6 +35,13 @@ function createCurrentColObject(goalmap) {
   return oCurrentCol
 }
 
+function createLinkToCurrentColGoalmap(oCol) {
+  linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCol['goalmap_id'])
+  colTag = "<a href='" + linkToGoalmap + "'>" + oCol['fullname'] + "</a>"
+
+  return colTag
+}
+
 var goalmapsInfoQuery = "sql: 
                                       SELECT 
 					                              gm.id AS goalmap_id,
@@ -185,10 +192,9 @@ if (!ArrayCount(goalmapsInfo)) {
       if (ArrayCount(oCollaborators[col].colSettingAndRework)) {
         colsArray = new Array()
         for (oCol in oCollaborators[col].colSettingAndRework) {
-          linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCol['goalmap_id'])
-          colTag = "<a href='" + linkToGoalmap + "'>" + oCol['fullname'] + "</a>"
-          colsArray.push(colTag)
-
+          colsArray.push(
+            createLinkToCurrentColGoalmap(oCol)
+          )
         }
 
         settingColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
@@ -210,9 +216,9 @@ if (!ArrayCount(goalmapsInfo)) {
 
         colsArray = new Array()
         for (oCol in oCollaborators[col].bossAgreement) {
-          linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCol['goalmap_id'])
-          colTag = "<a href='" + linkToGoalmap + "'>" + oCol['fullname'] + "</a>"
-          colsArray.push(colTag)
+          colsArray.push(
+            createLinkToCurrentColGoalmap(oCol)
+          )
 
         }
         agreementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
@@ -234,10 +240,9 @@ if (!ArrayCount(goalmapsInfo)) {
 
         colsArray = new Array()
         for (oCol in oCollaborators[col].bossAgreement) {
-          linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCol['goalmap_id'])
-          colTag = "<a href='" + linkToGoalmap + "'>" + oCol['fullname'] + "</a>"
-          colsArray.push(colTag)
-
+          colsArray.push(
+            createLinkToCurrentColGoalmap(oCol)
+          )
         }
 
         finalApprovementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
