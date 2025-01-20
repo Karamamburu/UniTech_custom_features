@@ -173,7 +173,7 @@ if (!ArrayCount(goalmapsInfo)) {
         !ArrayCount(oCollaborators[col].bossAgreement) &&
         !ArrayCount(oCollaborators[col].colFinalApprovement)     
       ) {
-        //Log(oCollaborators[col].col_fullname + " не получил уведомление, потому что красавчик")
+        Log(oCollaborators[col].col_fullname + " не получил уведомление, потому что красавчик")
         continue
       }
 
@@ -182,7 +182,6 @@ if (!ArrayCount(goalmapsInfo)) {
       bossAgreementBlock = ""
       colApprovementBlock = ""
       colsArray = new Array()
-      //linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCollaborators[col].goalmap_id);
 
       if (oCollaborators[col].state_id == StrInt(colSettingGoals) || oCollaborators[col].state_id == StrInt(colSettingGoalsRework)) {
         selfGoalsSettingAndReworkBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
@@ -261,17 +260,14 @@ if (!ArrayCount(goalmapsInfo)) {
       }
 
       fullText = selfGoalsSettingAndReworkBlock + colSettingAndReworkBlock + bossAgreementBlock + colApprovementBlock
+      //here we'll send the message tools.create_notificztion...
       Log(oCollaborators[col].col_fullname + ":" + fullText)
 
         if(col == StrInt(7356921955523507709)) {
-          Log(oCollaborators[col].col_fullname + ":" + fullText)
           Log("HERE WE'LL SEND THE MESSAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-          //tools.create_notification("multipurpose_year_start_reminder_type", 7281405151477773727, fullText)
+          tools.create_notification("multipurpose_year_start_reminder_type", 7138424178183920544, fullText)
 
         }
-
-
-      
     } catch (error) {
       Log("Error TEXT: " + error)
     } 
