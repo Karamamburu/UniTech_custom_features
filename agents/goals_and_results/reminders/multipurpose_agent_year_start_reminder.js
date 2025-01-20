@@ -238,7 +238,7 @@ if (!ArrayCount(goalmapsInfo)) {
       if (ArrayCount(oCollaborators[col].colFinalApprovement)) {
 
         colsArray = new Array()
-        for (oCol in oCollaborators[col].bossAgreement) {
+        for (oCol in oCollaborators[col].colFinalApprovement) {
           colsArray.push(
             createLinkToCurrentColGoalmap(oCol)
           )
