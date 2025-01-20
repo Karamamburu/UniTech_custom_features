@@ -42,6 +42,32 @@ function createLinkToCurrentColGoalmap(oCol) {
   return colTag
 }
 
+function fillColsArray(arrayName) {
+  colsArray = new Array()
+  for (oCol in oCollaborators[col][arrayName]) {
+    colsArray.push(
+      createLinkToCurrentColGoalmap(oCol)
+    )
+  }
+
+  return colsArray
+}
+
+function createColsBlock(colsArray) {
+  colsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
+          colsArray.join('</br>') + 
+          "</div>" + 
+          "<style>" +
+          "@media (max-width: 600px) {" +
+          "  p { font-size: 0.4em;}" +
+          "}" +
+          "</style>"
+
+  return colsBlock
+}
+
+var listItemParagraphWithStyles = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>"
+
 var goalmapsInfoQuery = "sql: 
                                       SELECT 
 					                              gm.id AS goalmap_id,
@@ -184,28 +210,16 @@ if (!ArrayCount(goalmapsInfo)) {
       colsArray = new Array()
 
       if (oCollaborators[col].state_id == StrInt(colSettingGoals) || oCollaborators[col].state_id == StrInt(colSettingGoalsRework)) {
-        selfGoalsSettingAndReworkBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        selfGoalsSettingAndReworkBlock = listItemParagraphWithStyles + 
         "- поставить свои цели и отправить их на согласование руководителю" + "</p>"
       }
 
       if (ArrayCount(oCollaborators[col].colSettingAndRework)) {
-        colsArray = new Array()
-        for (oCol in oCollaborators[col].colSettingAndRework) {
-          colsArray.push(
-            createLinkToCurrentColGoalmap(oCol)
-          )
-        }
+        
+        colsArray = fillColsArray('colSettingAndRework')
+        settingColsBlock = createColsBlock(colsArray)
 
-        settingColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
-          colsArray.join('</br>') + 
-          "</div>" + 
-          "<style>" +
-          "@media (max-width: 600px) {" +
-          "  p { font-size: 0.4em;}" +
-          "}" +
-          "</style>"
-
-        colSettingAndReworkBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        colSettingAndReworkBlock = listItemParagraphWithStyles + 
         "- напомнить " + (ArrayCount(oCollaborators[col].colSettingAndRework) > 1 ? 'сотрудникам' : 'сотруднику') + " поставить цели и отправить их тебе на согласование: " + 
         settingColsBlock + 
         "</p>"
@@ -213,23 +227,10 @@ if (!ArrayCount(goalmapsInfo)) {
 
       if (ArrayCount(oCollaborators[col].bossAgreement)) {
 
-        colsArray = new Array()
-        for (oCol in oCollaborators[col].bossAgreement) {
-          colsArray.push(
-            createLinkToCurrentColGoalmap(oCol)
-          )
+        colsArray = fillColsArray('bossAgreement')
+        agreementColsBlock = createColsBlock(colsArray)
 
-        }
-        agreementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
-          colsArray.join('</br>') + 
-          "</div>" + 
-          "<style>" +
-          "@media (max-width: 600px) {" +
-          "  p { font-size: 0.4em;}" +
-          "}" +
-          "</style>"
-
-          bossAgreementBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        bossAgreementBlock = listItemParagraphWithStyles + 
         "- согласовать цели " + (ArrayCount(oCollaborators[col].bossAgreement) > 1 ? 'сотрудникам: ' : 'сотруднику: ') + 
         agreementColsBlock + 
         "</p>"
@@ -237,30 +238,17 @@ if (!ArrayCount(goalmapsInfo)) {
 
       if (ArrayCount(oCollaborators[col].colFinalApprovement)) {
 
-        colsArray = new Array()
-        for (oCol in oCollaborators[col].colFinalApprovement) {
-          colsArray.push(
-            createLinkToCurrentColGoalmap(oCol)
-          )
-        }
+        colsArray = fillColsArray('colFinalApprovement')
+        finalApprovementColsBlock = createColsBlock(colsArray)
 
-        finalApprovementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
-          colsArray.join('</br>') + 
-          "</div>" + 
-          "<style>" +
-          "@media (max-width: 600px) {" +
-          "  p { font-size: 0.4em;}" +
-          "}" +
-          "</style>"
-
-          colApprovementBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
+        colApprovementBlock = listItemParagraphWithStyles + 
         "- напомнить " + (ArrayCount(oCollaborators[col].colFinalApprovement) > 1 ? 'сотрудникам ' : 'сотруднику ') + " подтвердить ознакомление с целями: " + 
         finalApprovementColsBlock + 
         "</p>"
       }
 
       fullText = selfGoalsSettingAndReworkBlock + colSettingAndReworkBlock + bossAgreementBlock + colApprovementBlock
-      //here we'll send the message tools.create_notificztion...
+      //here we'll send the message tools.create_notification...
       Log(oCollaborators[col].col_fullname + ":" + fullText)
 
         if(col == StrInt(7356921955523507709)) {
