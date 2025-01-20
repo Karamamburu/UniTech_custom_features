@@ -174,8 +174,7 @@ if (!ArrayCount(goalmapsInfo)) {
       colSettingAndReworkBlock = ""
       bossAgreementBlock = ""
       colApprovementBlock = ""
-
-      //нужно придумать, где хранить goalmap_id сотрудника, чтобы по клику на него переходить в его карту целей
+      colsArray = new Array()
       //linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCollaborators[col].goalmap_id);
 
       if (oCollaborators[col].state_id == StrInt(colSettingGoals) || oCollaborators[col].state_id == StrInt(colSettingGoalsRework)) {
@@ -184,9 +183,16 @@ if (!ArrayCount(goalmapsInfo)) {
       }
 
       if (ArrayCount(oCollaborators[col].colSettingAndRework)) {
+        colsArray = new Array()
+        for (oCol in oCollaborators[col].colSettingAndRework) {
+          linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCol['goalmap_id'])
+          colTag = "<a href='" + linkToGoalmap + "'>" + oCol['fullname'] + "</a>"
+          colsArray.push(colTag)
+
+        }
 
         settingColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
-          oCollaborators[col].colSettingAndRework.join('</br>') + 
+          colsArray.join('</br>') + 
           "</div>" + 
           "<style>" +
           "@media (max-width: 600px) {" +
@@ -195,15 +201,22 @@ if (!ArrayCount(goalmapsInfo)) {
           "</style>"
 
         colSettingAndReworkBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
-        "- напомнить поставить цели и отправить их тебе на согласование " + (ArrayCount(oCollaborators[col].colSettingAndRework) > 1 ? 'сотрудникам: ' : 'сотруднику: ') + 
+        "- напомнить " + (ArrayCount(oCollaborators[col].colSettingAndRework) > 1 ? 'сотрудникам' : 'сотруднику') + " поставить цели и отправить их тебе на согласование: " + 
         settingColsBlock + 
         "</p>"
       }
 
       if (ArrayCount(oCollaborators[col].bossAgreement)) {
 
+        colsArray = new Array()
+        for (oCol in oCollaborators[col].bossAgreement) {
+          linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCol['goalmap_id'])
+          colTag = "<a href='" + linkToGoalmap + "'>" + oCol['fullname'] + "</a>"
+          colsArray.push(colTag)
+
+        }
         agreementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
-          oCollaborators[col].bossAgreement.join('</br>') + 
+          colsArray.join('</br>') + 
           "</div>" + 
           "<style>" +
           "@media (max-width: 600px) {" +
@@ -219,8 +232,16 @@ if (!ArrayCount(goalmapsInfo)) {
 
       if (ArrayCount(oCollaborators[col].colFinalApprovement)) {
 
+        colsArray = new Array()
+        for (oCol in oCollaborators[col].bossAgreement) {
+          linkToGoalmap = UrlAppendPath(global_settings.settings.portal_base_url, '/_wt/goal_setting_col?goalmap_id=' + oCol['goalmap_id'])
+          colTag = "<a href='" + linkToGoalmap + "'>" + oCol['fullname'] + "</a>"
+          colsArray.push(colTag)
+
+        }
+
         finalApprovementColsBlock = "<div style='padding: 4px; margin-top: 8px;'>" + 
-          oCollaborators[col].colFinalApprovement.join('</br>') + 
+          colsArray.join('</br>') + 
           "</div>" + 
           "<style>" +
           "@media (max-width: 600px) {" +
@@ -229,13 +250,13 @@ if (!ArrayCount(goalmapsInfo)) {
           "</style>"
 
           colApprovementBlock = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>" + 
-        "- напомнить подтвердить ознакомление с целями " + (ArrayCount(oCollaborators[col].colFinalApprovement) > 1 ? 'сотрудникам: ' : 'сотруднику: ') + 
+        "- напомнить " + (ArrayCount(oCollaborators[col].colFinalApprovement) > 1 ? 'сотрудникам ' : 'сотруднику ') + " подтвердить ознакомление с целями: " + 
         finalApprovementColsBlock + 
         "</p>"
       }
 
       fullText = selfGoalsSettingAndReworkBlock + colSettingAndReworkBlock + bossAgreementBlock + colApprovementBlock
-      //Log(oCollaborators[col].col_fullname + ":" + fullText)
+      Log(oCollaborators[col].col_fullname + ":" + fullText)
 
         if(col == StrInt(7356921955523507709)) {
           Log(oCollaborators[col].col_fullname + ":" + fullText)
