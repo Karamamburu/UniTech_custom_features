@@ -27,6 +27,14 @@ var colSettingGoalsRework = 7283857459099681927;
 var colFinalApprovement = 7283857504467095538;
 var colEvaluation = 7283857534769645145;
 
+function createCurrentColObject(goalmap) {
+  oCurrentCol = {}
+  oCurrentCol.fullname = "" + GetReadable.getReadableShortName(goalmap.col_fullname)
+  oCurrentCol.goalmap_id = "" + goalmap.goalmap_id
+
+  return oCurrentCol
+}
+
 var goalmapsInfoQuery = "sql: 
                                       SELECT 
 					                              gm.id AS goalmap_id,
@@ -114,9 +122,8 @@ if (!ArrayCount(goalmapsInfo)) {
       goalmap.state_id == colSettingGoalsRework
     ) {
       try {
-        oCollaborators[goalmap.boss_id].colSettingAndRework.push(
-          "" + GetReadable.getReadableShortName(goalmap.col_fullname)
-        );
+        oCurrentCol = createCurrentColObject(goalmap)
+        oCollaborators[goalmap.boss_id].colSettingAndRework.push(oCurrentCol)
       } catch (error) {
         Log("Error COL SETTING AND REWORK: " + error)
       }
@@ -126,9 +133,8 @@ if (!ArrayCount(goalmapsInfo)) {
       goalmap.state_id == bossAgreementGoals
     ) {
       try {
-        oCollaborators[goalmap.boss_id].bossAgreement.push(
-          "" + GetReadable.getReadableShortName(goalmap.col_fullname)
-        );
+        oCurrentCol = createCurrentColObject(goalmap)
+        oCollaborators[goalmap.boss_id].bossAgreement.push(oCurrentCol)
       } catch (error) {
         Log("Error BOSS AGREEMENT: " + error)
       }
@@ -138,9 +144,8 @@ if (!ArrayCount(goalmapsInfo)) {
       goalmap.state_id == colFinalApprovement
     ) {
       try {
-        oCollaborators[goalmap.boss_id].colFinalApprovement.push(
-          "" + GetReadable.getReadableShortName(goalmap.col_fullname)
-        );
+        oCurrentCol = createCurrentColObject(goalmap)
+        oCollaborators[goalmap.boss_id].colFinalApprovement.push(oCurrentCol)
       } catch (error) {
         Log("Error FINAL APPROVEMENT: " + error)
       }
@@ -161,7 +166,7 @@ if (!ArrayCount(goalmapsInfo)) {
         !ArrayCount(oCollaborators[col].bossAgreement) &&
         !ArrayCount(oCollaborators[col].colFinalApprovement)     
       ) {
-        Log(oCollaborators[col].col_fullname + " не получил уведомление")
+        //Log(oCollaborators[col].col_fullname + " не получил уведомление, потому что красавчик")
         continue
       }
 
@@ -230,11 +235,12 @@ if (!ArrayCount(goalmapsInfo)) {
       }
 
       fullText = selfGoalsSettingAndReworkBlock + colSettingAndReworkBlock + bossAgreementBlock + colApprovementBlock
-      Log(oCollaborators[col].col_fullname + ":" + fullText)
+      //Log(oCollaborators[col].col_fullname + ":" + fullText)
 
         if(col == StrInt(7356921955523507709)) {
+          Log(oCollaborators[col].col_fullname + ":" + fullText)
           Log("HERE WE'LL SEND THE MESSAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-          tools.create_notification("multipurpose_year_start_reminder_type", 7281405151477773727, fullText)
+          //tools.create_notification("multipurpose_year_start_reminder_type", 7281405151477773727, fullText)
 
         }
 
