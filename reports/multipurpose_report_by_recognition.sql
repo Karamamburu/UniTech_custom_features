@@ -1,3 +1,43 @@
+var masterAccessGroupId = 7116912537642955540
+
+function isMemberOfGroup(col_id, group_id) {
+	
+     query = "sql: 
+				SELECT id FROM group_collaborators
+				WHERE group_id = " + group_id + "
+				AND collaborator_id = " + col_id + "
+	"
+	var groupCollaboratorsRows = ArraySelectAll(XQuery(query))
+	if (ArrayCount(groupCollaboratorsRows)) {
+		return true
+	}
+	return false
+}
+
+if (isMemberOfGroup(initiator_person_id, masterAccessGroupId)) {
+
+var query = "sql:
+WITH temp AS (
+SELECT
+    c.id AS sender_id,
+    c.fullname AS sender_fullname, 
+    c.position_name, 
+    c.position_parent_name, 
+    COUNT(acc.id) OVER(PARTITION BY c.id) AS recognition_count
+FROM collaborators c
+JOIN cc_acceptances acc ON c.id = acc.sender_id
+LEFT JOIN collaborators cls ON cls.id = acc.recipient_id
+WHERE 
+  c.position_name NOT IN ('EXT Contractor')
+  AND c.login != 'ru.corporate.university'
+) SELECT DISTINCT *
+  FROM temp
+  ORDER BY recognition_count DESC
+"
+
+} else {
+
+var query = "sql:
 WITH temp AS (
     SELECT
         CASE
@@ -45,3 +85,8 @@ SELECT DISTINCT
 FROM filtered_employees, temp
 WHERE employee_partner_name = initiator_partner_name
 ORDER BY recognition_count DESC
+"
+}
+
+var recognitions = XQuery(query)
+return recognitions

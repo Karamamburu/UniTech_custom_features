@@ -41,7 +41,7 @@ function createLinkToCurrentColGoalmap(oCol) {
     global_settings.settings.portal_base_url,
     "/_wt/goal_setting_col?goalmap_id=" + oCol["goalmap_id"]
   );
-  colTag = "<a href='" + linkToGoalmap + "'>" + oCol["fullname"] + "</a>"
+  colTag = "<a style='margin-left: auto; margin-right: auto; font-size: 14px; font-weight: normal; text-align: center; border-bottom: 1px solid;' href='" + linkToGoalmap + "'>" + oCol["fullname"] + "</a>"
 
   return colTag
 }
@@ -57,7 +57,7 @@ function fillColsArray(arrayName) {
 
 function createColsBlock(colsArray) {
   colsBlock =
-    "<div style='padding: 4px; margin-top: 8px;'>" +
+    "<div style='padding: 4px; margin-top: 4px;'>" +
     colsArray.join("</br>") +
     "</div>" +
     "<style>" +
@@ -69,7 +69,7 @@ function createColsBlock(colsArray) {
   return colsBlock
 }
 
-var listItemParagraphWithStyles = "<p style='font-weight: bold; font-size: 16px; margin: 30px 0 15px 0; '>"
+var listItemParagraphWithStyles = "<p style='font-weight: normal; font-size: 16px; margin: 15px 0 15px 0; '>"
 
 var goalmapsInfoQuery = "sql: 
                           SELECT 
@@ -175,9 +175,11 @@ if (!ArrayCount(goalmapsInfo)) {
   }
   Log(tools.object_to_text(oCollaborators, "json"))
   var selfGoalsSettingAndReworkBlock = ""
+  var selfGoalsApprovementBlock = ""
   var colSettingAndReworkBlock = ""
   var bossAgreementBlock = ""
   var colApprovementBlock = ""
+
 
   //в цикле проходим по каждому сотруднику, собираем для него сообщение исходя из статуса его карты целей
   //и наполнения подмассивов подчинённых
@@ -186,6 +188,7 @@ if (!ArrayCount(goalmapsInfo)) {
       if (
         oCollaborators[col].state_id != StrInt(colSettingGoals) &&
         oCollaborators[col].state_id != StrInt(colSettingGoalsRework) &&
+        oCollaborators[col].state_id != StrInt(colFinalApprovement) &&
         !ArrayCount(oCollaborators[col].colSettingAndRework) &&
         !ArrayCount(oCollaborators[col].bossAgreement) &&
         !ArrayCount(oCollaborators[col].colFinalApprovement)
@@ -198,6 +201,7 @@ if (!ArrayCount(goalmapsInfo)) {
       }
 
       selfGoalsSettingAndReworkBlock = ""
+      selfGoalsApprovementBlock = ""
       colSettingAndReworkBlock = ""
       bossAgreementBlock = ""
       colApprovementBlock = ""
@@ -209,7 +213,16 @@ if (!ArrayCount(goalmapsInfo)) {
       ) {
         selfGoalsSettingAndReworkBlock =
           listItemParagraphWithStyles +
-          "- поставить свои цели и отправить их на согласование руководителю" +
+          "<strong>✓ Поставить <a style=' border-bottom: 1px solid;' href='https://academy.uni.rest/_wt/goal_setting_col'>свои цели</a></strong> и&nbspотправить&nbspих на&nbspсогласование руководителю;" +
+          "</p>";
+      }
+
+      if (
+        oCollaborators[col].state_id == StrInt(colFinalApprovement)
+      ) {
+        selfGoalsApprovementBlock =
+          listItemParagraphWithStyles +
+          "<strong>✓ Ознакомиться&nbspсо <a style=' border-bottom: 1px solid;' href='https://academy.uni.rest/_wt/goal_setting_col'>своими целями;</a><strong>" +
           "</p>";
       }
 
@@ -219,11 +232,11 @@ if (!ArrayCount(goalmapsInfo)) {
 
         colSettingAndReworkBlock =
           listItemParagraphWithStyles +
-          "- напомнить " +
+          "<strong>✓ Напомнить </strong>" +
           (ArrayCount(oCollaborators[col].colSettingAndRework) > 1
-            ? "сотрудникам"
-            : "сотруднику") +
-          " поставить цели и отправить их тебе на согласование: " +
+            ? "<strong>сотрудникам</strong>"
+            : "<strong>сотруднику</strong>") +
+          " поставить&nbspцели и отправить&nbspих тебе на&nbspсогласование: " +
           settingColsBlock +
           "</p>"
       }
@@ -234,7 +247,7 @@ if (!ArrayCount(goalmapsInfo)) {
 
         bossAgreementBlock =
           listItemParagraphWithStyles +
-          "- согласовать цели " +
+          "<strong>✓ Согласовать цели </strong>" +
           (ArrayCount(oCollaborators[col].bossAgreement) > 1
             ? "сотрудникам: "
             : "сотруднику: ") +
@@ -248,30 +261,31 @@ if (!ArrayCount(goalmapsInfo)) {
 
         colApprovementBlock =
           listItemParagraphWithStyles +
-          "- напомнить " +
+          "<strong>✓ Напомнить </strong>" +
           (ArrayCount(oCollaborators[col].colFinalApprovement) > 1
-            ? "сотрудникам "
-            : "сотруднику ") +
-          " подтвердить ознакомление с целями: " +
+            ? "<strong>сотрудникам </strong>"
+            : "<strong>сотруднику </strong>") +
+          " ознакомиться с&nbspцелями: " +
           finalApprovementColsBlock +
           "</p>"
       }
 
       fullText =
         selfGoalsSettingAndReworkBlock +
+        selfGoalsApprovementBlock +
         colSettingAndReworkBlock +
         bossAgreementBlock +
         colApprovementBlock;
       //в конце цикла отправляем уведомление и передаём в него собранный текст tools.create_notification...
       Log(oCollaborators[col].col_fullname + ":" + fullText)
       //ЗДЕСЬ ПЕРВЫЙ ID - СОТРУДНИК, ВТОРОЙ - КОМУ ОТПРАВИТЬ ТЕСТОВОЕ УВЕДОМЛЕНИЕ!
-      if (col == StrInt(7356921955523507709)) {
+      if (col == StrInt(7306113248204959278)) {
         Log(
           "HERE WE'LL SEND THE MESSAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         );
         tools.create_notification(
           "multipurpose_year_start_reminder_type",
-          7138424178183920544,
+          7306113248204959278,
           fullText
         );
       }
