@@ -141,3 +141,27 @@ function getReporters(boss_id) {
 
    return aReportersObjects
 }
+
+/**
+ * @function createBellNotification
+ * @description функция для создания кастомных уведомлений в колокольчик
+ * @param {id} col_id id сотрудника
+ * @param {id} object_id id документа - плана обучения, карты целей и т.д.
+ * @param {string} object_type тип документа
+ * @param {string} text текст уведомления
+ * @param {string} link ссылка, на которую ведёт уведомление
+ */
+function createBellNotification(col_id, object_id, object_type, text, link) {
+
+    _notification_doc = tools.new_doc_by_name('cc_notification', false)
+    _notification_doc.TopElem.object_id = OptInt(object_id)
+    _notification_doc.TopElem.object_type = object_type
+    _notification_doc.TopElem.collaborator_id = col_id
+    _notification_doc.TopElem.description = text
+    _notification_doc.TopElem.link = link
+    _notification_doc.TopElem.is_info = false
+    _notification_doc.TopElem.is_read = false
+    _notification_doc.BindToDb()
+    _notification_doc.Save()
+
+}

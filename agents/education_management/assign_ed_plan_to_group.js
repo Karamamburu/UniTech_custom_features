@@ -6,6 +6,10 @@ function log(text) {
     }
 }
 
+UniTools = OpenCodeLib(
+  FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/uni_tools.js")
+);
+
 function active_compound_program(user_id, compound_program_id) {
     compoundProgramDoc = tools.open_doc(compound_program_id);
     if (compoundProgramDoc == undefined)
@@ -203,7 +207,8 @@ if (compoundProgramDoc == undefined){
 
             succesProcessingCol.push(col.id);
 
-            tools.create_notification(notificationTypeCode, col.id, '', '');
+            tools.create_notification(notificationTypeCode, col.id, '', compoundProgramDoc.TopElem.id);
+            UniTools.createBellNotification(col.id, compoundProgramDoc.TopElem.id, 'education_plan', 'Тебе назначен план обучения по программе' + compoundProgramDoc.TopElem.name, 'https://academy.uni.rest/_wt/' + compoundProgramDoc.TopElem.id)
 
             log('Education plan for collaborator with ID ' + col.id + ' created.');
         } catch(ex) {
