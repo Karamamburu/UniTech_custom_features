@@ -9,23 +9,29 @@ function Log(message, ex) {
 EnableLog(Param.log_file_name, true);
 Log("Начало работы агента");
 
-var queryBirthdayCollaborators = "sql:
-			SELECT c.id, c.fullname, c.position_parent_name FROM group_collaborators gc
-			LEFT JOIN collaborators c ON c.id = gc.collaborator_id
-			WHERE gc.group_id = " + Param.group_id + "
-			AND DAY(c.birth_date) = DAY(GETDATE())
-			AND MONTH(c.birth_date) = MONTH(GETDATE())
-			AND c.is_dismiss = 0
-			AND c.position_name IN ('FOH TM', 'MOH TM', 'BOH TM', 'Team Member', 'Team Trainer', 
-							'Shift Supervisor', 'Assistant Manager', 'RGM', 
-							'RGM Trainee', 'Area Coach', 'Region Coach', 'Market Coach')	
-"
+var curAgentId = 7415912966683428734 //id текущего агента
+var teCurAgentDoc = tools.open_doc(curAgentId).TopElem
 
-var birthdayCols = ArraySelectAll(XQuery(queryBirthdayCollaborators))
+if (StrLongDate(teCurAgentDoc.last_run_date) != StrLongDate(Date())) {
 
-if (!ArrayCount(birthdayCols)) {
-	
-	Log("сегодня именинников в ресторанах нет")
+	var queryBirthdayCollaborators = "sql:
+		SELECT c.id, c.fullname, c.position_parent_name FROM group_collaborators gc
+		LEFT JOIN collaborators c ON c.id = gc.collaborator_id
+		WHERE gc.group_id = " + Param.group_id + "
+		AND DAY(c.birth_date) = DAY(GETDATE())
+		AND MONTH(c.birth_date) = MONTH(GETDATE())
+		AND c.is_dismiss = 0
+		AND c.position_name IN ('FOH TM', 'MOH TM', 'BOH TM', 'Team Member', 'Team Trainer', 
+						'Shift Supervisor', 'Assistant Manager', 'RGM', 
+						'RGM Trainee', 'Area Coach', 'Region Coach', 'Market Coach')	
+	"
+
+
+	var birthdayCols = ArraySelectAll(XQuery(queryBirthdayCollaborators))
+
+	if (!ArrayCount(birthdayCols)) {
+		
+		Log("сегодня именинников в ресторанах нет")
 
 } else {
 
@@ -44,10 +50,11 @@ if (!ArrayCount(birthdayCols)) {
 		} catch(ex) {
 			Log("Произошла ошибка: " + ", Error: " + err.message)
 		}
-
-		
 	}
-
+}
+    
+} else {
+    Log("Данный агент уже запускался сегодня")
 }
 
 Log("Окончание работы агента");
