@@ -414,18 +414,6 @@ if (sStep != "")
 				birthDate = person_doc.TopElem.birth_date;
 			}
 
-
-//НАДО ПРОВЕРИТЬ ОТПРАВКУ УВЕДОМЛЕНИЙ!!!
-
-			_notification_doc = tools.new_doc_by_name('cc_notification', false);
-			_notification_doc.TopElem.object_id = active_learning_id;
-			_notification_doc.TopElem.object_type = 'collaborator';
-			_notification_doc.TopElem.collaborator_id = personIDs;
-			_notification_doc.TopElem.description = 'Тебе назначено тестирование по стандартам. Пройти его ты можешь по ссылке: ... Желаем удачи!';
-			_notification_doc.TopElem.is_info = true;
-			_notification_doc.BindToDb();
-			_notification_doc.Save();
-
 			if(active_learning_id != null){
 				rgmNewDoc = tools.new_doc_by_name("cc_presentation_rgm", false);
 				rgmNewDoc.BindToDb();
@@ -440,6 +428,19 @@ if (sStep != "")
 				rgmNewDoc.TopElem.question_6 = getParam(arrFormFields, "q6");
 				rgmNewDoc.TopElem.active_test_learning_id = active_learning_id;
 				rgmNewDoc.Save();
+				
+				UniTools = OpenCodeLib(
+					FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/uni_tools.js")
+				  );
+
+				UniTools.createBellNotification(
+					OptInt(personIDs), 
+					active_learning_id, 
+					'assessment', 
+					'Тебе назначено тестирование перед сертификацией. Удачи!', 
+					UrlAppendPath( global_settings.settings.portal_base_url, active_learning_id)
+				)
+
 
 				MESSAGE = "Процесс входного тестирования запущен."
 			}

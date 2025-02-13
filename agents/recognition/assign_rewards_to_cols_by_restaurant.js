@@ -40,7 +40,6 @@ if (!ArrayCount(colsToAssignRewards)) {
 		try {
 
 			CustomGameTools.giveTrophyToUser(col.id, Param.reward_id, Param.sender_id)
-
 			Log("Награда для сотрудника " + col.fullname + " успешно присвоена")
 		} catch (ex) {
 			Log('Ошибка: ', ex);
