@@ -64,19 +64,16 @@ if (!ArrayCount(birthdayInfo)) {
 			"}" +
 			"</style>"
 
-		_dateText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '> Совсем скоро, <b>" + 
-				tools.call_code_library_method('get_readable', 'getReadableShortDate', [object.birth_date]) + 
-				"</b>,"
-				
-		_notificationText = "<p style='font-weight: normal; font-size: 0.6em; margin: 0 0 30px 0; '>" + 
-			"отмечает свой День рождения!<br>
-			Одна из наших ценностей – Командная работа, и День рождения – отличный повод признать вклад именинника в общее дело. Поздравь своего коллегу от всей команды Rostic's!</p>"
+            _dateText = "<p style='font-weight: normal; font-size: 0.8em; margin: 0 0 30px 0; '>" + GetReadable.getOnlyCyrillicName(object.boss_name) + ", привет! Совсем скоро, <b style='color:#a020c2;'>" + 
+            GetReadable.getReadableShortDate(object.birth_date) + "</b>,"
+		
+		_notificationText = "<p style='font-weight: normal; font-size: 0.8em; margin: 0 0 30px 0; '>" + 
+			"отмечает свой День рождения!<br><br>Одна из наших ценностей – Командная&nbsp;работа, и&nbsp;День&nbsp;рождения – отличный&nbsp;повод признать вклад именинника в&nbsp;общее дело. Поздравь своего коллегу от&nbsp;всей&nbsp;команды&nbsp;Rostic's!</p>"
 
 		_fullText = _dateText + "<br>" + _readableShortName + "<br>" + _notificationText
-//чтобы отправить боссу, в следующей строке просто передать boss_id вторым агрументом
-		//tools.create_notification("boss_birthday_notification_type", 7138424178183920544, _fullText)
-	}
 
+		tools.create_notification("boss_birthday_notification_type", OptInt(object.boss_id), _fullText)
+	}
 }
 
 Log("Окончание работы агента");

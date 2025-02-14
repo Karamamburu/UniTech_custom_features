@@ -123,6 +123,7 @@ if (!ArrayCount(goalmapsInfo)) {
       if (!oCollaborators.HasProperty(goalmap.col_id)) {
         oCollaborators[goalmap.col_id] = {};
         oCollaborators[goalmap.col_id].goalmap_id = "" + goalmap.goalmap_id;
+	      oCollaborators[goalmap.col_id].col_id = "" + goalmap.col_id;
         oCollaborators[goalmap.col_id].col_fullname = "" + GetReadable.getReadableShortName(goalmap.col_fullname);
         oCollaborators[goalmap.col_id].boss_id = "" + goalmap.boss_id;
         oCollaborators[goalmap.col_id].boss_fullname = "" + goalmap.boss_fullname;
@@ -276,19 +277,17 @@ if (!ArrayCount(goalmapsInfo)) {
         colSettingAndReworkBlock +
         bossAgreementBlock +
         colApprovementBlock;
+
       //в конце цикла отправляем уведомление и передаём в него собранный текст tools.create_notification...
-      Log(oCollaborators[col].col_fullname + ":" + fullText)
-      //ЗДЕСЬ ПЕРВЫЙ ID - СОТРУДНИК, ВТОРОЙ - КОМУ ОТПРАВИТЬ ТЕСТОВОЕ УВЕДОМЛЕНИЕ!
-      if (col == StrInt(7306113248204959278)) {
-        Log(
-          "HERE WE'LL SEND THE MESSAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-        );
-        tools.create_notification(
-          "multipurpose_year_start_reminder_type",
-          7306113248204959278,
-          fullText
-        );
-      }
+
+	tools.create_notification(
+		  "multipurpose_year_start_reminder_type",
+		  oCollaborators[col].col_id,
+		  fullText
+	)
+
+      Log(oCollaborators[col].col_fullname + ": " + fullText)
+      
     } catch (error) {
       Log("Error TEXT: " + error)
     }
