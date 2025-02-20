@@ -434,7 +434,7 @@ if (sStep != "")
 				  );
 
 				UniTools.createBellNotification(
-					OptInt(personIDs), 
+					OptInt(getParam(arrFormFields, "personIDs")), 
 					active_learning_id, 
 					'assessment', 
 					'Тебе назначено тестирование перед сертификацией. Удачи!', 

@@ -14,7 +14,7 @@ function isNullOrEmpty(value) {
 /**
  * @description Метод получения информации по пользователе по ID
  * @function getCollaboratorInfo
- * @param {bigint} collaborator_id 
+ * @param {bigint} collaborator_id
  * @returns {object}
  */
 function getCollaboratorInfo(collaborator_id) {
@@ -24,14 +24,14 @@ function getCollaboratorInfo(collaborator_id) {
 /**
  * @description Метод получения информации о квалификации
  * @function getQualificationInfo
- * @param {bigint} qualification_id 
+ * @param {bigint} qualification_id
  * @returns {object}
  */
 function getQualificationInfo(qualification_id) {
     return ArrayOptFirstElem(XQuery("sql: SELECT * FROM qualifications WHERE id = " + qualification_id), {});
 }
 
-/** 
+/**
  *  @typedef {object} trans_ids
  *  @property {bigint} trans_ids.coming - ID транзакции прихода.
  *  @property {bigint} trans_ids.expense - ID транзакции расхода.
@@ -63,7 +63,7 @@ function topUpAccount(recipientAccountId, amount, senderAccountId, transactionCo
     trans_sen_doc = undefined;
     trans_rec_doc = tools.new_doc_by_name("transaction", false);
     trans_rec_doc.BindToDb();
-    
+
     // Перевод с аккаунта на аккаунт
     if (senderAccountId) {
         account_sen_doc = tools.open_doc(senderAccountId);
@@ -73,9 +73,10 @@ function topUpAccount(recipientAccountId, amount, senderAccountId, transactionCo
 
         if (OptInt(account_sen_doc.TopElem.balance, -1) < amount) {
             throw 'The sender, AccountID = ' + senderAccountId +' does not have enough funds';
-        } 
+        }
+
         account_sen_doc.TopElem.balance -= OptInt(amount);
-        
+
         trans_sen_doc = tools.new_doc_by_name("transaction", false);
         trans_sen_doc.TopElem.account_id = senderAccountId;
         trans_sen_doc.TopElem.person_id = account_sen_doc.TopElem.object_id
@@ -109,7 +110,7 @@ function topUpAccount(recipientAccountId, amount, senderAccountId, transactionCo
         account_sen_doc.Save();
         trans_sen_doc.Save();
     }
-    
+
     trans_ids = {
         coming: trans_rec_doc.DocID,
         expense: !isNull(trans_sen_doc) ? trans_sen_doc.DocID : 0
@@ -127,11 +128,15 @@ function topUpAccount(recipientAccountId, amount, senderAccountId, transactionCo
  * @returns {trans_ids} ID транзакций.
  */
 function topUpAcceptanceAccountOut(recipientId, amount, transactionCode) {
-    rec_account_id = ArrayOptFirstElem(XQuery("sql: SELECT id FROM accounts WHERE object_type = 'collaborator' AND object_id = " + recipientId + " AND code = 'acceptance_account_out' "), {id:0}).id;
-    if (rec_account_id == 0) {
+    max_balance = 450;
+    rec_account = ArrayOptFirstElem(XQuery("sql: SELECT id, code, balance FROM accounts WHERE object_type = 'collaborator' AND object_id = " + recipientId + " AND code = 'acceptance_account_out' "));
+    if (rec_account == undefined) {
         throw 'Account not found, recipientId = ' + recipientId;
     }
-    return topUpAccount(rec_account_id, amount, undefined, transactionCode);
+    if (rec_account.code == 'acceptance_account_out' && (OptInt(rec_account.balance) + OptInt(amount)) > max_balance) {
+        amount = max_balance - OptInt(rec_account.balance)
+    }
+    return topUpAccount(rec_account.id, amount, undefined, transactionCode);
 }
 
 /**
@@ -150,10 +155,10 @@ function topUpAcceptanceAccountIn(recipientId, amount, senderId, transactionCode
     }
 
     sen_account_id = undefined;
-    
+
     if (senderId) {
         sen_account_id = ArrayOptFirstElem(XQuery("sql: SELECT id FROM accounts WHERE object_type = 'collaborator' AND object_id = " + senderId + " AND code =  'acceptance_account_out' "), {id:0}).id;
-        
+
         if (sen_account_id == 0) {
             throw 'Account not found, sen_account_id = ' + recipientId;
         }
@@ -173,9 +178,9 @@ function topUpAcceptanceAccountIn(recipientId, amount, senderId, transactionCode
  */
 function notificationAccountReplenishment(col_id, amount, sendName, acceptance_id) {
     collTe = tools.open_doc(col_id).TopElem;
-    if (collTe.position_name == "Area Coach" || collTe.position_name == "Region Coach" || collTe.position_name == "Market Coach" || 
-        collTe.position_name == "RSC" || collTe.position_name == "RSC Contractor" || collTe.position_name == "Key Operator" || 
-        collTe.position_name == "Owner") {
+    if (collTe.position_name == "Area Coach" || collTe.position_name == "Region Coach" || collTe.position_name == "Market Coach" ||
+        collTe.position_name == "RSC" || collTe.position_name == "RSC Contractor" || collTe.position_name == "Key Operator" ||
+        collTe.position_name == "Owner" || collTe.position_name == "Other") {
         tools.create_notification("accept_acceptance", col_id);
     }
     _notification_doc = tools.new_doc_by_name('cc_notification', false);
@@ -249,14 +254,6 @@ function giveAcceptanceToUser(recipient_id, sender_id, amount, resource_id, desc
         if (amount > balance) {
             throw 'Недостаточно признаний';
         }
-    
-        create_date = ArrayOptFirstElem(XQuery("sql:SELECT cas.create_date FROM cc_acceptances cas " + 
-            "JOIN transactions ts ON ts.id = cas.out_transaction_id AND ts.amount != 0 " +
-            "WHERE cas.recipient_id = " + recipient_id + " AND cas.sender_id = " + sender_id +  
-            "ORDER BY cas.create_date DESC"), {create_date: Date('01.01.1970 00:00:00')}).create_date;
-        if ((DateDiff(Date(), Date(create_date))/(60*60*24)) <= 30) {
-            throw 'Пользователю уже было отправлено признание за последние 30 дней.';
-        }
     }
 
     if (OptInt(recipient_id) == OptInt(sender_id)) {
@@ -265,12 +262,23 @@ function giveAcceptanceToUser(recipient_id, sender_id, amount, resource_id, desc
 
     var collaborator_info = getCollaboratorInfo(sender_id);
     var trans_ids = topUpAcceptanceAccountIn(recipient_id, amount, sender_id);
-    
+
+    is_first_acceptance_query = "sql: \
+        SELECT accs.id FROM cc_acceptances accs \
+        INNER JOIN transactions trns ON trns.id = accs.out_transaction_id \
+        WHERE accs.sender_id = " + sender_id + " AND trns.amount != 0 \
+    ";
+    is_return_cashback = ArrayOptFirstElem(XQuery(is_first_acceptance_query)) == undefined && amount != 0;
+
+    if (is_return_cashback) {
+        topUpAcceptanceAccountIn(sender_id, amount, undefined, 'cashback');
+    }
+
     _acceptance_doc = tools.new_doc_by_name('cc_acceptance', false);
     _acceptance_doc.TopElem.name = 'Признание - ' + collaborator_info.GetOptProperty('fullname', '') + ' - ' + Date();
     _acceptance_doc.TopElem.recipient_id = recipient_id;
     _acceptance_doc.TopElem.sender_id = sender_id;
-    _acceptance_doc.TopElem.in_transaction_id = trans_ids.coming; 
+    _acceptance_doc.TopElem.in_transaction_id = trans_ids.coming;
     _acceptance_doc.TopElem.out_transaction_id = trans_ids.expense;
     _acceptance_doc.TopElem.resource_id = resource_id;
     _acceptance_doc.TopElem.description = description;
@@ -280,8 +288,9 @@ function giveAcceptanceToUser(recipient_id, sender_id, amount, resource_id, desc
     _acceptance_doc.BindToDb();
     _acceptance_doc.Save();
 
+
     notificationAccountReplenishment(recipient_id, amount, collaborator_info.GetOptProperty('fullname', ''), _acceptance_doc.DocID);
-    
+
     return _acceptance_doc;
 }
 
@@ -366,6 +375,26 @@ function giveTrophyToUser(recipientId, qualificationId, senderId) {
 }
 
 /**
+* @function getAcceptanceMonth
+* @memberof UniRest
+* @description Список признаний отправленных сотруднику в течение месяца.
+* @returns {Object[]} Список признаний.
+*/
+function getAcceptanceMonth(senderId) {
+    if (isNull(senderId)) {
+        throw 'Отсутствует отправитель';
+    }
+
+    return ArraySelectAll(XQuery("sql: " +
+        " SELECT cas.recipient_id recevier_id,  ts.amount " +
+        " FROM cc_acceptances cas " +
+        " JOIN transactions ts ON ts.id = cas.out_transaction_id " +
+        " WHERE cas.sender_id = " + senderId +  "  AND cas.create_date >= DATEADD(DAY, -30, GETDATE()) "+
+        " ORDER BY cas.create_date DESC")
+    )
+}
+
+/**
 * @function getAllIcons
 * @memberof UniRest
 * @description Список всех значков.
@@ -379,7 +408,7 @@ function getAllIcons() {
     "       WHEN ISNULL(icons.resource_id, '') = '' " +
     "           THEN '' " +
     "           ELSE '/download_file.html?file_id=' + CAST(icons.resource_id AS NVARCHAR) "+
-    "   END " + 
+    "   END " +
     "   FROM cc_icons icons "
     return ArraySelectAll(XQuery(query));
 }
@@ -399,7 +428,7 @@ function getAllIconsByAccess(user_id) {
 
     var user_doc_te = user_doc.TopElem;
 
-    var icons = ArraySelectAll(XQuery("sql: " + 
+    var icons = ArraySelectAll(XQuery("sql: " +
         " SELECT  " +
         " 	ics.*,  " +
         " 	IIF(ics.resource_id IS NULL, '', '/download_file.html?file_id=' + CAST(ics.resource_id AS NVARCHAR)) 'pic_url'  " +
@@ -422,11 +451,11 @@ function getAllTrophys() {
     "   SELECT " +
     "       quals.*, " +
     "       CAST(0 AS BIT) 'new_entry', " +
-    "   pic_url = CASE " + 
+    "   pic_url = CASE " +
     "       WHEN ISNULL(qual.data.value('(//resource_id)[1]', 'bigint'), '') = '' " +
     "           THEN '' " +
     "           ELSE '/download_file.html?file_id=' + CAST(qual.data.value('(//resource_id)[1]', 'bigint') AS NVARCHAR) " +
-    "       END " +  
+    "       END " +
     "   FROM qualifications quals " +
     "   INNER JOIN qualification qual ON quals.id = qual.id " +
     "   WHERE quals.is_reward = 1 "
@@ -448,16 +477,16 @@ function getAllTrophysByAccess(user_id) {
 
     var user_doc_te = user_doc.TopElem;
 
-    var trophys = ArraySelectAll(XQuery("sql: " + 
+    var trophys = ArraySelectAll(XQuery("sql: " +
         "sql: " +
         "   SELECT " +
         "       quals.*, " +
         "       CAST(0 AS BIT) 'new_entry', " +
-        "   pic_url = CASE " + 
+        "   pic_url = CASE " +
         "       WHEN ISNULL(qual.data.value('(//resource_id)[1]', 'bigint'), '') = '' " +
         "           THEN '' " +
         "           ELSE '/download_file.html?file_id=' + CAST(qual.data.value('(//resource_id)[1]', 'bigint') AS NVARCHAR) " +
-        "       END " +  
+        "       END " +
         "   FROM qualifications quals " +
         "   INNER JOIN qualification qual ON quals.id = qual.id " +
         "   WHERE quals.is_reward = 1 "
@@ -482,7 +511,7 @@ function getAllAcceptances() {
         "       WHEN ISNULL(icons.resource_id, '') = '' " +
         "           THEN '' " +
         "           ELSE '/download_file.html?file_id=' + CAST(icons.resource_id AS NVARCHAR) "+
-        "   END " + 
+        "   END " +
         "   FROM cc_icons icons "
     ));
 }
@@ -502,7 +531,7 @@ function getAllAcceptancesByAccess(user_id) {
 
     var user_doc_te = user_doc.TopElem;
 
-    var acceptances = ArraySelectAll(XQuery("sql:" + 
+    var acceptances = ArraySelectAll(XQuery("sql:" +
         " SELECT " +
         " rs.id as id, " +
         " rs.name as name, " +
@@ -510,7 +539,7 @@ function getAllAcceptancesByAccess(user_id) {
         " FROM resources rs " +
         " WHERE rs.code = 'acceptance_img' "
     ));
-    
+
     return ArraySelect(acceptances, 'tools_web.check_access(This.id, user_id, user_doc_te) == true');
 }
 
@@ -534,13 +563,13 @@ function getAssignPersonIcons(coll_id, rangeDate) {
     "   SELECT " +
     "       icons.*, " +
     "       assign_icons.id 'idAssignIcon', " +
-    "       ISNULL(assign_icons.new_entry, 0) 'new_entry', " + 
+    "       ISNULL(assign_icons.new_entry, 0) 'new_entry', " +
     " 	    icon.data.value('(//description)[1]', 'nvarchar(max)') 'description', " +
     "   pic_url = CASE " +
     "       WHEN ISNULL(icons.resource_id, '') = '' " +
     "           THEN '' " +
     "           ELSE '/download_file.html?file_id=' + CAST(icons.resource_id AS NVARCHAR) "+
-    "   END " + 
+    "   END " +
     "   FROM cc_assign_icons assign_icons " +
     "   INNER JOIN cc_icons icons ON icons.id = assign_icons.icon_id " +
     "   INNER JOIN cc_icon icon ON icon.id = icons.id " +
@@ -572,11 +601,11 @@ function getAssignPersonTrophys(coll_id, rangeDate) {
     "       ISNULL(assign_qual.data.value('(//custom_elems/custom_elem[name=''new_entry'']/value)[1]', 'bit'), 0) 'new_entry', " +
     " 	    qual.data.value('(/qualification/comment)[1]', 'nvarchar(max)') 'comment', " +
     "       trans.amount 'amount_coming', " +
-    "       pic_url = CASE " + 
+    "       pic_url = CASE " +
     "       WHEN ISNULL(qual.data.value('(//resource_id)[1]', 'bigint'), '') = '' " +
     "           THEN '' " +
     "           ELSE '/download_file.html?file_id=' + CAST(qual.data.value('(//resource_id)[1]', 'bigint') AS NVARCHAR) " +
-    "       END " +  
+    "       END " +
     "   FROM qualification_assignments assign_quals " +
     "   INNER JOIN qualification_assignment assign_qual ON assign_qual.id = assign_quals.id" +
     "   INNER JOIN qualifications quals ON assign_quals.qualification_id = quals.id " +
@@ -597,8 +626,8 @@ function getAssignPersonTrophys(coll_id, rangeDate) {
 function getAcceptanceAccountOut(user_id) {
     var query = "sql: SELECT acc.* from accounts acc WHERE acc.code='acceptance_account_out' AND acc.object_id=" + user_id;
     var query_res = ArrayOptFirstElem(XQuery(query));
-    if (isNull(query_res)){
-        throw  'Acceptance out account not found';
+    if (isNull(query_res)) {
+        throw 'Acceptance out account not found';
     }
     return query_res;
 }
@@ -617,4 +646,78 @@ function getAcceptanceAccountIn(user_id) {
         throw  'Acceptance in account not found';
     }
     return query_res;
+}
+/**
+ * @typedef {Object} setLikeResult
+ * @property {number} error - Статус ошибки (0 - успех, 1 - ошибка).
+ * @property {string} errorText - Текст ошибки, если она произошла.
+ * @property {string|undefined} result - Результат операции ('success' или undefined).
+ */
+
+/**
+ * @typedef {Object} getEvaluatedListResult
+ * @property {string} code - код типа документа для которого предназначен лайк.
+ * @property {string} id - ИД документа которму предназначен лайк.
+ * @property {string} name - название документа которму предназначен лайк.
+ * @property {string} lastStatus - последний статус от текущего пользователя (0 значит не было ещё лайков, 1 значит уже был).
+ * @property {string} userID - ИД сотрудника который ставит лайк.
+ */
+ 
+/**
+* @function setLikeForAcceptance
+* @memberof UniRest
+* @description Добавление или удаление лайков из таблицы cc_like
+* @param {object} data - набор данных для записи.
+* @returns {setLikeResult}
+*/
+function setLike(data) {
+
+	oRes = new Object();
+    oRes.error = 0;
+    oRes.errorText = "";
+    oRes.result = undefined;
+	
+	try{
+		if(Int(data.lastStatus) == 0){
+			getLikeID = ArrayOptFirstElem(XQuery("for $elem in cc_likes where $elem/collaborator_id = "+ data.userID +" and $elem/object_id = "+ data.id +" return $elem"));
+			if(getLikeID != undefined){
+				oRes.error = 1;
+				oRes.errorText = "Лайк ранее уже добавлен в таблицу cc_likes.";
+				return oRes;				
+			}else{
+				newDocLike = tools.new_doc_by_name( 'cc_like', false );
+				newDocLike.TopElem.code = data.code;
+				newDocLike.TopElem.name = data.name;
+				newDocLike.TopElem.collaborator_id = data.userID; 
+				newDocLike.TopElem.object_id = data.id; 
+				newDocLike.TopElem.date = Date();
+				newDocLike.BindToDb();
+				newDocLike.Save();
+				
+				oRes.result = 'success';
+				return oRes;			
+			}
+
+		}else{
+			getLikeID = XQuery("for $elem in cc_likes where $elem/collaborator_id = "+ data.userID +" and $elem/object_id = "+ data.id +" return $elem");
+			if(ArrayOptFirstElem(getLikeID) != undefined){
+				//На всякий случай зачищаем дубли...
+				for(delItem in getLikeID){
+					DeleteDoc(UrlFromDocID (OptInt(delItem.id)));
+				}
+				oRes.result = 'success';
+				return oRes;				
+			}else{
+				oRes.error = 1;
+				oRes.errorText = "Лайк не был найден в таблице cc_likes.";
+				return oRes;				
+			}
+
+		}
+		
+	}catch(error){
+		oRes.error = 1;
+        oRes.errorText = error;
+        return oRes;
+	}
 }
