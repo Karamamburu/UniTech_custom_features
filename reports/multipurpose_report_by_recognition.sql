@@ -1,36 +1,39 @@
 var masterAccessGroupId = 7116912537642955540
 
-function isMemberOfGroup(col_id, group_id) {
-	
-     query = "sql: 
-				SELECT id FROM group_collaborators
-				WHERE group_id = " + group_id + "
-				AND collaborator_id = " + col_id + "
-	"
-	var groupCollaboratorsRows = ArraySelectAll(XQuery(query))
-	if (ArrayCount(groupCollaboratorsRows)) {
-		return true
-	}
-	return false
-}
+UniTools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/uni_tools.js"));
+GetReadable = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/getReadable.js"));
+GetDataForLpe = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/wtv/libs/custom_libs/get_data_for_lpe.js"));
 
-if (isMemberOfGroup(initiator_person_id, masterAccessGroupId)) {
+if (UniTools.isMemberOfGroup(initiator_person_id, masterAccessGroupId)) {
 
 var query = "sql:
+
 WITH temp AS (
 SELECT
     c.id AS sender_id,
     c.fullname AS sender_fullname, 
     c.position_name, 
-    c.position_parent_name, 
+    c.position_parent_name,
+    acc.create_date, 
     COUNT(acc.id) OVER(PARTITION BY c.id) AS recognition_count
 FROM collaborators c
 JOIN cc_acceptances acc ON c.id = acc.sender_id
 LEFT JOIN collaborators cls ON cls.id = acc.recipient_id
 WHERE 
+  acc.create_date BETWEEN 
+    CAST('" + StrXmlDate({PARAM1}) + "' AS DATE)
+    AND
+    CAST('" + StrXmlDate({PARAM2}) + "' AS DATE)
+AND
   c.position_name NOT IN ('EXT Contractor')
-  AND c.login != 'ru.corporate.university'
-) SELECT DISTINCT *
+AND 
+  c.login != 'ru.corporate.university'
+) SELECT DISTINCT
+     sender_id,
+     sender_fullname,
+     position_name,
+     position_parent_name,
+     recognition_count
   FROM temp
   ORDER BY recognition_count DESC
 "
@@ -74,7 +77,6 @@ filtered_employees AS (
     WHERE 
         c.position_name NOT IN ('RSC', 'RSC Contractor', 'Other', 'EXT Contractor')
         AND c.login != 'ru.corporate.university'
-
 )
 SELECT DISTINCT 
     sender_id, 
@@ -89,4 +91,26 @@ ORDER BY recognition_count DESC
 }
 
 var recognitions = XQuery(query)
-return recognitions
+
+var aResult = new Array()
+for (object in recognitions) {
+    newObj = new Object()
+    newObj.PrimaryKey = object.sender_id
+    newObj.sender_id = object.sender_id
+    newObj.sender_fullname = GetReadable.getReadableShortName(object.sender_fullname)
+    newObj.position_name = GetReadable.getReadablePositionName(object.sender_id)
+    newObj.position_parent_name = GetReadable.getReadablePositionParentName(object.sender_id)
+    newObj.partner_name = GetDataForLpe.getPartnerName(object.sender_id) == 'ИРБ' 
+        ? 'IRB Family' 
+        : GetDataForLpe.getPartnerName(object.sender_id) == 'МайРест' 
+            ? 'IRB Family' 
+            : GetDataForLpe.getPartnerName(object.sender_id) == 'РБП' 
+                 ? 'IRB Family' 
+                 : GetDataForLpe.getPartnerName(object.sender_id)
+    newObj.recognition_count = object.recognition_count
+    newObj.test_date = {PARAM1} 
+
+    aResult.push(newObj)
+}
+
+return aResult
