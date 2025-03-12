@@ -75,8 +75,12 @@ filtered_employees AS (
     LEFT JOIN subdivisions s3 ON s2.parent_object_id = s3.id
     LEFT JOIN subdivisions s4 ON s3.parent_object_id = s4.id
     WHERE 
-        c.position_name NOT IN ('RSC', 'RSC Contractor', 'Other', 'EXT Contractor')
-        AND c.login != 'ru.corporate.university'
+      acc.create_date BETWEEN 
+        CAST('" + StrXmlDate({PARAM1}) + "' AS DATE)
+        AND
+        CAST('" + StrXmlDate({PARAM2}) + "' AS DATE)
+      AND c.position_name NOT IN ('RSC', 'RSC Contractor', 'Other', 'EXT Contractor')
+      AND c.login != 'ru.corporate.university'
 )
 SELECT DISTINCT 
     sender_id, 
