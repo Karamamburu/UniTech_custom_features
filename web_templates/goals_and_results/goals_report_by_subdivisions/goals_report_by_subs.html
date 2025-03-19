@@ -1,0 +1,134 @@
+<link rel="stylesheet" type="text/css" href="/custom/dx_grid/dx.light.css" />
+<script src="/custom/dx_grid/dx.all.js"></script>
+<script src="/custom/dx_grid/dx.messages.ru.js"></script>
+
+<div class="header-text">
+    <div id="main_header_text" class="header-text-main">Карты целей моих подчиненных</div>
+    <!-- <div class="header-text-second">
+        Второй заголовок
+    </div> -->
+</div>
+
+<div class="dx-viewport">
+    <div id="gridContainer"></div>
+</div>
+
+<script>
+    DevExpress.localization.locale('ru');
+
+    collaborators = [];
+    columns = [];
+
+    $.ajax({
+        url: 'goal_settings/goal_setting_report_my_subs/goal_setting_report_my_subs_controller.html',
+        type: "POST",
+        dataType: "JSON",
+        data: {
+            mode: 'catalog'
+        },
+        async: false,
+        error: (xhr, message) => {
+            alert("SERVER ERROR\n" + message);
+        },
+        success: (data) => {
+            collaborators = data;
+        }
+    });
+
+    $.ajax({
+        url: 'goal_settings/goal_setting_report_my_subs/goal_setting_report_my_subs_controller.html',
+        type: "POST",
+        dataType: "JSON",
+        data: {
+            mode: 'columns'
+        },
+        async: false,
+        error: (xhr, message) => {
+            alert("SERVER ERROR\n" + message);
+        },
+        success: (data) => {
+            columns = data;
+        }
+    });
+
+    columns.forEach(column => {
+        if (column.dataField === 'fullname') {
+            column.cellTemplate = function (container, options) {  
+                    $('<a/>').addClass('dx-link')  
+                        .text(options.data.fullname)
+                        .on('dxclick', function () {  
+                            window.open(options.data.link, '_blank').focus(); 
+                        })
+                        .appendTo(container);  
+                }  
+        }
+    });
+
+    $(function () {
+        var dataGrid = $("#gridContainer").dxDataGrid({
+            keyExpr: 'id',
+            dataSource: collaborators,
+            columnsAutoWidth: true,
+            showBorders: true,
+            allowColumnResizing: true,
+            columnResizingMode: "widget",
+            editing: {
+                allowUpdating: false
+            },
+            paging: {
+                pageSize: 10
+            },
+            pager: {
+                showPageSizeSelector: true,
+                allowedPageSizes: [10, 20, 50],
+                showNavigationButtons: true
+            },
+            filterRow: {
+                visible: true,
+                applyFilter: "auto"
+            },
+            height: function () {
+                return window.innerHeight / 1.3;
+            },
+            columns: columns
+        }).dxDataGrid('instance');
+    });
+
+</script>
+
+<style>
+    .dx-viewport {
+        /* margin-left: auto;
+        margin-right: auto; */
+        width: calc(100vw - 3em);
+        margin-left: 1em;
+        max-width: 80em;
+        border-radius: 2px;
+    }
+
+    .header-text {
+        margin-left: 1em;
+        padding: 1em 0em;
+    }
+
+    .header-text-main {
+        font-size: 24px;
+    }
+
+    .header-text-second {
+        margin: 1em 0em 1em 0em;
+    }
+
+    .dx-datagrid-borders > .dx-datagrid-header-panel {
+        padding: .5em 0em 0em .5em;
+        border: 1px solid #ddd;
+    }
+
+    .dx-datagrid-borders > .dx-datagrid-pager {
+        border: 1px solid #ddd;
+    }
+
+    td[role=columnheader] {  
+        text-align: left!important  
+    }  
+</style>

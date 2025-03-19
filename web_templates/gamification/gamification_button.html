@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+        }
+        .bb {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 24px;
+            color: #A020C2;
+            border: 2px solid #A020C2;
+            z-index: 99999;
+        }
+        .tooltip {
+            position: absolute;
+            bottom: 60px;
+            right: 10px;
+            background: white;
+            color: black;
+            padding: 10px;
+            border-radius: 10px;
+            white-space: nowrap;
+            font-size: 14px;
+            border: 1px solid #A020C2;
+            display: none;
+            z-index: 99999;
+        }
+        .bb:hover {
+          box-shadow: 0 0 9px 5px rgba(160, 32, 194, 0.1);
+          color: #A020C2;
+        }
+        .bb:hover .tooltip {
+            display: block;
+        }
+        a, a:visited {
+          color: #A020C2;
+          text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="<%=UrlAppendPath( global_settings.settings.portal_base_url, '/view_doc.html?mode=doc_std_20203_info&object_id=7101347623008139601')%>" class="bb">
+        ?
+        <span class="tooltip">Помощь с инструментом признаний</span>
+    </a>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<%
+Server.Execute(AppDirectoryPath() + "/wt/web/include/user_init.html" );
+DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_game_tools.js"));
+custom_game_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_game_tools.js"));
+
+DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+custom_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_tools.js"));
+
+result = {
+    'success': true
+};
+
+request_body = tools.read_object(Request.Body);
+mode = request_body.GetOptProperty('mode', '');
+
+
+switch(mode) {
+    case 'get_trophy':
+        pageNumber = request_body.GetOptProperty('pageNumber', '');
+        pageSize = request_body.GetOptProperty('pageSize', 10);
+        user_id = request_body.GetOptProperty('userID', 0);
+        if (pageNumber == '' || pageNumber < 1 || pageSize < 1) {
+            result.success = false;
+        } else {
+            assignTrophy = custom_game_tools.getAssignPersonTrophys(user_id);
+            result.data = ArrayRange(assignTrophy, (pageNumber-1) * pageSize, pageSize);
+            result.total = Int(ArrayCount(assignTrophy))
+            result.totalPages = Math.ceil(OptReal(OptReal(ArrayCount(assignTrophy)) / pageSize));
+
+            for (elem in result.data) {
+                try {
+                    trophyDoc = OpenDoc(UrlFromDocID(elem.idAssignQual));
+                    if (elem.new_entry) {
+                        trophyDoc.TopElem.custom_elems.ObtainChildByKey('new_entry').value = false;
+                        trophyDoc.Save();
+                    }
+                } catch(err) {
+                    alert(err)
+                }
+            }
+        }
+        break;
+    
+    case 'get_icon':
+        pageNumber = request_body.GetOptProperty('pageNumber', '');
+        pageSize = request_body.GetOptProperty('pageSize', 10);
+        user_id = request_body.GetOptProperty('userID', 0);
+        if (pageNumber == '' || pageNumber < 1 || pageSize < 1) {
+            result.success = false;
+        } else {
+            assignIcon = custom_game_tools.getAssignPersonIcons(user_id);
+            result.data = ArrayRange(assignIcon, (pageNumber-1) * pageSize, pageSize);
+            result.total = Int(ArrayCount(assignIcon))
+            result.totalPages = Math.ceil(OptReal(OptReal(ArrayCount(assignIcon)) / pageSize)) ;
+            for (elem in result.data) {
+                try {
+                    iconDoc = OpenDoc(UrlFromDocID(elem.idAssignIcon));
+                    if (elem.new_entry) {
+                        iconDoc.TopElem.new_entry = false;
+                        iconDoc.Save();
+                    }
+                } catch(err) {
+                    alert(err)
+                }
+            }
+        }
+        break;
+        
+}
+
+Response.Write(tools.object_to_text(result, 'json', 5));
+
+%>

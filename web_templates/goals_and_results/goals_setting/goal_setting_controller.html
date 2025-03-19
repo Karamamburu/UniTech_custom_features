@@ -1,0 +1,244 @@
+<%
+
+function access_to_goalmap(goalmap_id, obj) {
+    var target_goalmap_id = goalmap_id;
+
+    if (obj != undefined) {
+        target_goalmap_id = obj.GetOptProperty('goalmap_id', 0);
+        if (target_goalmap_id == 0) {
+            var obj_id = obj.GetOptProperty('id', 0);
+            obj_doc = tools.open_doc(obj_id);
+    
+            if (obj_doc == undefined) {
+                throw 'Access denied';
+            }
+    
+            if (OptInt(obj_doc.TopElem.goalmap_id, 0) == 0) {
+                throw 'Access denied';
+            }
+    
+            target_goalmap_id = OptInt(obj_doc.TopElem.goalmap_id, 0);
+        }
+    }
+
+    var access = goal_tools.access_to_goalmap(target_goalmap_id, curUserID);
+    if (!access) {
+        throw 'Access denied';
+    }
+}
+
+DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_goal_tools.js"));
+goal_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_goal_tools.js"));
+
+DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+custom_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+
+Server.Execute(AppDirectoryPath() + "/wt/web/include/user_init.html" );
+
+result = {
+    'success': true
+};
+
+request_body = tools.read_object(Request.Body);
+mode = request_body.GetOptProperty('mode', '');
+
+switch(mode) {
+    case 'access':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+        result = {
+            access: goal_tools.access_to_goalmap(goalmap_id, curUserID)
+        };
+        break;
+
+	case 'save_okr':
+        okr = request_body.GetOptProperty('okr', {});
+
+        access_to_goalmap(0, okr);
+
+        goal_tools.create_or_update_okr(okr);
+        break;
+
+	case 'okrs':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        result = goal_tools.get_okrs(goalmap_id);
+		break;
+
+	case 'save_ipr':
+        ipr = request_body.GetOptProperty('ipr', {});
+
+        access_to_goalmap(0, ipr);
+
+        result = goal_tools.create_or_update_ipr(ipr);
+        break;
+
+	case 'iprs':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        include_non_actual = request_body.GetOptProperty('include_non_actual', false);
+        result = goal_tools.get_iprs(goalmap_id, include_non_actual);
+		break;
+
+    case 'rps':
+        result = goal_tools.get_rps();
+        break;
+
+    case 'gap':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        result = goal_tools.get_gap(goalmap_id);
+		break;
+
+    case 'permission_rules':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        result = goal_tools.permissionRulesGoalmap(goalmap_id, curUserID);
+        break;
+        
+    case 'col_manager':
+        result = goal_tools.getApproveManager(curUserID)
+        break;
+
+    case 'col_info':
+        collaborator_id = request_body.GetOptProperty('collaborator_id');
+        result = goal_tools.get_collaborator_info(collaborator_id);
+        break;
+
+    case 'educ_program_info':
+        result = goal_tools.get_education_program_info();
+        break;
+
+    case 'fake_positions':
+        department = request_body.GetOptProperty('department');
+        result = ArraySort(goal_tools.get_fake_positions_by_department(department), 'StrLowerCase (This.position_name)', '+');
+        break;
+
+    case 'goalmap_info':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        result = goal_tools.getGoalmapInfo(goalmap_id);
+        break;
+
+    case 'goalmap_comments':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        result = custom_tools.get_all_comments(curUserID, goalmap_id);
+        break;
+
+    case 'goalmaps':
+        collaborator_id = request_body.GetOptProperty('collaborator_id');
+        result = ArraySort(goal_tools.get_goalmaps_by_user_id_short_data(collaborator_id), 'This.year', '-');
+        break;
+
+    case 'goals':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        include_non_actual = request_body.GetOptProperty('include_non_actual', false);
+        result = goal_tools.get_goals(goalmap_id, include_non_actual);
+        break;
+
+    case 'goal_results':
+        result = goal_tools.get_goal_result_types();
+        break;
+
+    case 'save_goal':
+        goal = request_body.GetOptProperty('goal', {});
+
+        access_to_goalmap(0, goal);
+
+        goal_tools.create_or_update_goal(goal);
+        break;
+
+	case 'save_goalmap':
+        goalmap = request_body.GetOptProperty('goalmap', {});
+
+        access_to_goalmap(goalmap.GetOptProperty('id', 0));
+
+        goal_tools.update_goalmap(goalmap);
+        break;
+
+    case 'drop_goal':
+        goal = request_body.GetOptProperty('goal', {});
+
+        access_to_goalmap(0, goal);
+
+        if (goal.GetOptProperty('id') == undefined) {
+            throw 'Incorrect goal. Not found id.';
+        }
+        goal_tools.drop_goal(goal.id);
+        break;
+
+    case 'update_goalmap':
+        goalmap = request_body.GetOptProperty('goalmap', {});
+        action_name = request_body.GetOptProperty('action_name', '');
+        comment = request_body.GetOptProperty('comment', '');
+
+        access_to_goalmap(goalmap.GetOptProperty('id', 0));
+
+        if ((action_name == 'send_to_approve' || action_name == 'return_to_work' || action_name == 'approve') && comment != '') {
+            custom_tools.create_comment(curUserID, goalmap.GetOptProperty('id'), comment);
+        }
+
+        goal_tools.move_goalmap_by_workflow(goalmap, action_name);
+        break;
+
+    case 'update_goalmap_position':
+        goalmap_id = request_body.GetOptProperty('goalmap_id', 0);
+        position_id = request_body.GetOptProperty('fake_position_id', 0);
+
+        access_to_goalmap(goalmap_id);
+
+        goal_tools.update_goalmap_position(goalmap_id, position_id);
+        break;
+
+    case 'pdf':
+        var requestBody = tools.read_object(Request.Body, 'json');
+
+        htmlStr = requestBody.html_code;
+        tempFileName = ObtainTempFile('.pdf');
+        tools.html_to_pdf(htmlStr, '', UrlToFilePath(tempFileName));
+
+        var pdf_byte_data = LoadFileData(UrlToFilePath(tempFileName));
+
+        var binary_data = new Binary();
+
+        binary_data.AssignStr(pdf_byte_data);
+
+        Response.ContentType = "application/pdf";
+        Response.WriteBinary(binary_data);
+
+        DeleteFile( tempFileName );
+
+        break;
+
+    case 'get_css_file':
+        var css_content = LoadFileText(AppDirectoryPath() + "/wt/web/goal_settings/goal_setting_col/goal_settting_col.css");
+
+        Response.ContentType = "text/css";
+        Response.Write(css_content);
+        break;
+
+    case 'get_comptenece_360_unirest':
+        result = {
+			"competence_ids": goal_tools.get_competences_ids_str()
+		}
+        break;
+}
+
+Response.Write(tools.object_to_text(result, 'json'));
+
+%>
