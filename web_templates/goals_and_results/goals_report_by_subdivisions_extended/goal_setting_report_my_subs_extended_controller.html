@@ -1,0 +1,424 @@
+<%
+function createExcelHeaderRow(oWorksheet, column_name, column_number, value, column_width) {
+    oCell = oWorksheet.Cells.GetCell(column_name + "3");
+    oCell.Value = RValue(value);
+    oCell.Style.FontSize = 10;
+    oCell.Style.IsBold = true;
+    oCell.Style.HorizontalAlignment = "Center";
+    oCell.Style.VerticalAlignment = "Center";
+    oCell.Style.IsTextWrapped = true;
+    oCell.Style.Borders.SetStyle("Thin");
+    oCell.Style.Borders.SetColor("#000000");
+    oCell.Style.ForegroundColor = "#d9d9d9";
+    oWorksheet.Cells.SetColumnWidth(Int(column_number), Real(column_width));
+}
+
+function createExcelRow(oWorksheet, column_name, row_number, value) {
+    oCell = oWorksheet.Cells.GetCell(column_name + "" + row_number);
+    oCell.Value = RValue(value);
+    oCell.Style.FontSize = 10;
+    oCell.Style.IsBold = false;
+    oCell.Style.HorizontalAlignment = "Center";
+    oCell.Style.VerticalAlignment = "Center";
+    oCell.Style.IsTextWrapped = true;
+    oCell.Style.Borders.SetStyle("Thin");
+    oCell.Style.Borders.SetColor("#000000");
+}
+
+function isNullOrEmpty(value) {
+    if (value == null || value == undefined || value == '') {
+        return true;
+    }
+    return false;
+}
+
+result = {
+    "success": false
+};
+
+periods = ArraySelectAll(XQuery("sql: SELECT * FROM cc_periods"));
+goalmap_states = ArraySelectAll(XQuery("sql: SELECT * FROM cc_goalmap_states"));
+potencials = ArraySelectAll(XQuery("sql: SELECT * FROM cc_potencial_colls"));
+skill_levels = ArraySelectAll(XQuery("sql: SELECT * FROM cc_skill_levels"));
+escape_risks = ArraySelectAll(XQuery("sql: SELECT * FROM cc_escape_risks"));
+
+request_body = tools.read_object(Request.Body);
+mode = request_body.GetOptProperty('mode', '');
+
+switch(mode) {
+    case 'columns':
+        result = [
+            {
+                "dataField": "department",
+                "caption": "Департамент",
+                "dataType": "string",
+                "sortOrder": 'asc',
+                "minWidth": 200,
+            },
+            {
+                "dataField": "position_parent_name",
+                "caption": "Подразделение",
+                "dataType": "string",
+                "sortOrder": 'asc',
+                "minWidth": 200,
+            },
+            {
+                "dataField": "fake_position_name",
+                "caption": "Должность",
+                "dataType": "string",
+                "sortOrder": 'asc',
+                "minWidth": 200,
+            },
+            {
+                "dataField": "login",
+                "caption": "Логин сотрудника",
+                "dataType": "string",
+                "minWidth": 100,
+            },
+            {
+                "dataField": "fullname",
+                "caption": "ФИО сотрудника",
+                "dataType": "string",
+                "sortOrder": 'asc',
+                "minWidth": 200,
+            },
+            {
+                "dataField": "period_id",
+                "caption": "Период",
+                "dataType": "string",
+                "minWidth": 100,
+                "width": "auto",
+                "lookup": {
+                    "dataSource": periods,
+                    "valueExpr": "id",
+                    "displayExpr": "year",
+                }
+            },
+            {
+                "dataField": "state_id",
+                "caption": "Статус",
+                "dataType": "string",
+                "minWidth": 200,
+                "width": "auto",
+                "lookup": {
+                    "dataSource": goalmap_states,
+                    "valueExpr": "id",
+                    "displayExpr": "name",
+                }
+            },
+            {
+                "dataField": "manager_fullname",
+                "caption": "Согласующий руководитель",
+                "dataType": "string",
+                "minWidth": 250,
+            },
+            {
+                "dataField": "is_informed_goals",
+                "caption": "Ознакомлен с годовыми целями",
+                "dataType": "boolean",
+                "minWidth": 150,
+            },
+            {
+                "dataField": "is_approved_y1",
+                "caption": "Промежуточная оценка согласована",
+                "dataType": "boolean",
+                "minWidth": 150,
+            },
+            {
+                "dataField": "is_approved_y2",
+                "caption": "Итоговая оценка согласована",
+                "dataType": "boolean",
+                "minWidth": 150,
+            },
+            {
+                "dataField": "goal_result_name",
+                "caption": "Оценка результата",
+                "dataType": "boolean",
+                "minWidth": 150,
+                "width": "auto",
+            },
+            {
+                "dataField": "comment_manager",
+                "caption": "Комментарий руководителя по оценке",
+                "dataType": "text",
+                "minWidth": 300,
+            },
+            {
+                "dataField": "potential_id",
+                "caption": "Уровень потенциала",
+                "dataType": "text",
+                "minWidth": 200,
+                "lookup": {
+                    "dataSource": potencials,
+                    "valueExpr": "id",
+                    "displayExpr": "name",
+                }
+            },
+            {
+                "dataField": "profession_id",
+                "caption": "Уровень профессионализма",
+                "dataType": "text",
+                "minWidth": 200,
+                "lookup": {
+                    "dataSource": skill_levels,
+                    "valueExpr": "id",
+                    "displayExpr": "name",
+                }
+            },
+            {
+                "dataField": "escape_risk_id",
+                "caption": "Риск ухода",
+                "dataType": "text",
+                "minWidth": 200,
+                "lookup": {
+                    "dataSource": escape_risks,
+                    "valueExpr": "id",
+                    "displayExpr": "name",
+                }
+            },
+            {
+                "dataField": "comment_manager_by_grow",
+                "caption": "Комментарий руководителя по развитию",
+                "dataType": "text",
+                "minWidth": 300,
+            }
+        ];
+        break;
+
+    case 'catalog':
+        Server.Execute("../../include/user_init.html");
+
+        //DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+        custom_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+
+        var direct_subordinate = request_body.GetOptProperty('directSubordinate', false);
+
+        if (!direct_subordinate) {
+            sql_cond = "INNER JOIN get_sub_person_ids_by_func_manager_id(@cur_user_id) coll_ids ON gms.collaborator_id = coll_ids.id OR gms.manager_id = @cur_user_id";
+        } else {
+            sql_cond = "INNER JOIN (
+                    SELECT
+                        object_id AS id
+                    FROM
+                        func_managers
+                    WHERE
+                        catalog = 'collaborator' AND person_id = @cur_user_id
+                ) AS coll_ids ON gms.collaborator_id = coll_ids.id OR gms.manager_id = @cur_user_id
+            ";
+        }
+
+        sql_request = "sql:
+        DECLARE
+        @cur_user_id BIGINT = " + curUserID + ";
+        
+        WITH UniqueGoalMaps AS (
+        SELECT
+            DISTINCT
+            gms.id,
+            gms.name,
+            ISNULL(cl.data.value('(//custom_elems//custom_elem[name=\"department\"]/value)[1]', 'nvarchar(max)'), '') AS department,
+            cls.position_parent_name,
+            fake_pos.position_name AS fake_position_name,
+            cls.login,
+            cls.fullname,
+            gms.period_id,
+            gms.state_id,
+            mngr.fullname AS 'manager_fullname',
+            CASE
+                WHEN gstate.code IN (0, 1, 2, 3) THEN CAST(0 AS BIT)
+                ELSE CAST(1 AS BIT)
+            END AS 'is_informed_goals',
+            gms.is_approved_y1,
+            gms.is_approved_y2,
+            gresult.name AS 'goal_result_name',
+            gm.data.value('(//comment_manager)[1]', 'nvarchar(max)') 'comment_manager',
+            gm.data.value('(//comment_manager_by_grow)[1]', 'nvarchar(max)') 'comment_manager_by_grow',
+            '/_wt/goal_setting_col?col_id=' + CAST(cls.id AS NVARCHAR) + '&goalmap_id=' + CAST(gms.id AS NVARCHAR) 'link',
+            pot.id AS 'potential_id',
+            prof.id as 'profession_id',
+            risks.id as 'escape_risk_id'
+        FROM
+            cc_goalmaps gms
+        INNER JOIN cc_goalmap gm ON gm.id = gms.id
+        "+ sql_cond +"
+        INNER JOIN collaborators cls ON cls.id = gms.collaborator_id
+        INNER JOIN collaborator cl ON cl.id = cls.id
+        LEFT JOIN cc_position_to_departments fake_pos ON fake_pos.id = gms.fake_position_id
+        LEFT JOIN collaborators mngr ON mngr.id = gms.manager_id
+        LEFT JOIN cc_goalmap_states gstate ON gstate.id = gms.state_id
+        LEFT JOIN cc_goal_results gresult ON gresult.id = gms.finish_goals_mark
+        LEFT JOIN cc_potencial_colls pot ON pot.id = gms.potencial_coll_id
+        LEFT JOIN cc_skill_levels prof ON prof.id = gms.skill_level_id
+        LEFT JOIN cc_escape_risks risks ON risks.id = gms.escape_risk_id
+        )
+        SELECT
+            *
+        FROM
+            UniqueGoalMaps;
+        ";
+
+        result = ArraySelectAll(XQuery(sql_request));
+
+        break;
+
+    case 'excel':
+        Server.Execute("../../include/user_init.html");
+
+        //DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+        custom_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+
+        var direct_subordinate = request_body.GetOptProperty('directSubordinate', false);
+
+        if (!direct_subordinate) {
+            sql_cond = "INNER JOIN get_sub_person_ids_by_func_manager_id(@cur_user_id) coll_ids ON gms.collaborator_id = coll_ids.id";
+        } else {
+            sql_cond = "INNER JOIN (
+                    SELECT
+                        object_id AS id
+                    FROM
+                        func_managers
+                    WHERE
+                        catalog = 'collaborator' AND person_id = @cur_user_id
+                ) AS coll_ids ON gms.collaborator_id = coll_ids.id OR gms.manager_id = @cur_user_id
+            ";
+        }
+
+        sql_request = "sql:
+            DECLARE
+                @cur_user_id BIGINT = " + curUserID + ";
+
+            SELECT DISTINCT
+                gms.id,
+                ISNULL(cl.data.value('(//custom_elems//custom_elem[name=\"department\"]/value)[1]', 'nvarchar(max)'), '') AS department,
+                cls.position_parent_name,
+                fake_pos.position_name AS fake_position_name,
+                cls.login,
+                cls.fullname,
+                periods.year AS 'period_name',
+                gstate.name AS 'state_name',
+                mngr.fullname AS 'manager_fullname',
+                CASE
+                    WHEN gstate.code IN (0, 1, 2, 3) THEN CAST(0 AS BIT)
+                    ELSE CAST(1 AS BIT)
+                END AS 'is_informed_goals',
+                gms.is_approved_y1,
+                gms.is_approved_y2,
+                gresult.name AS 'goal_result_name',
+                gm.data.value('(//comment_manager)[1]', 'nvarchar(max)') 'comment_manager',
+                gm.data.value('(//comment_manager_by_grow)[1]', 'nvarchar(max)') 'comment_manager_by_grow',
+                '/_wt/goal_setting_col?col_id=' + CAST(cls.id AS NVARCHAR) + '&goalmap_id=' + CAST(gms.id AS NVARCHAR) 'link',
+                pot.name AS 'potential_name',
+                prof.name as 'profession_name',
+                risks.name as 'escape_risk_name'
+            FROM cc_goalmaps gms
+            INNER JOIN cc_goalmap gm ON gm.id = gms.id
+            " + sql_cond + "
+            INNER JOIN collaborators cls ON cls.id = gms.collaborator_id
+            INNER JOIN collaborator cl ON cl.id = cls.id
+            LEFT JOIN cc_position_to_departments fake_pos On fake_pos.id = gms.fake_position_id
+            LEFT JOIN cc_periods periods ON periods.id = gms.period_id
+            LEFT JOIN collaborators mngr ON mngr.id = gms.manager_id
+            LEFT JOIN cc_goalmap_states gstate ON gstate.id = gms.state_id
+            LEFT JOIN cc_goal_results gresult ON gresult.id = gms.finish_goals_mark
+            LEFT JOIN cc_potencial_colls pot ON pot.id = gms.potencial_coll_id
+            LEFT JOIN cc_skill_levels prof ON prof.id = gms.skill_level_id
+            LEFT JOIN cc_escape_risks risks ON risks.id = gms.escape_risk_id
+        ";
+
+        data = ArraySelectAll(XQuery(sql_request));
+
+        var oExcelDoc = null;
+
+        try{
+            var url_temp_folder = 'x-local://wt/web/temp_files';
+            ObtainDirectory(url_temp_folder);
+            url_temp_folder = 'x-local://wt/web/temp_files/' + String(curUserID);
+            ObtainDirectory(url_temp_folder);
+            var temp_folder = UrlToFilePath(url_temp_folder);
+            var file_name = "goal_setting_report_my_subs_extended.xlsx";
+
+            oExcelDoc = tools.get_object_assembly( 'Excel' );
+            oExcelDoc.CreateWorkBook();
+
+            var oWorksheet = oExcelDoc.GetWorksheet(0);
+            oWorksheet.PageSetup.Orientation = "Landscape";
+            oWorksheet.PageSetup.PaperSize = "PaperA4";
+
+            oExcelDoc.Open(temp_folder + "\\" + file_name);
+
+            oWorksheet.Cells.Merge(0, 0, 1, 3);
+            var oCell = oWorksheet.Cells.GetCell("A1");
+            oCell.Value = "Цели и результаты команды";
+            oCell.Style.FontSize = 10;
+            oCell.Style.IsBold = false;
+            oCell.Style.HorizontalAlignment = "Center";
+            oCell.Style.VerticalAlignment = "Center";
+            oCell.Style.IsTextWrapped = true;
+
+            createExcelHeaderRow(oWorksheet, "A", "0", "Департамент", 40);
+            createExcelHeaderRow(oWorksheet, "B", "1", "Подразделение", 40);
+            createExcelHeaderRow(oWorksheet, "C", "2", "Должность", 40);
+            createExcelHeaderRow(oWorksheet, "D", "3", "Логин сотрудника", 20);
+            createExcelHeaderRow(oWorksheet, "E", "4", "ФИО сотрудника", 40);
+            createExcelHeaderRow(oWorksheet, "F", "5", "Период", 20);
+            createExcelHeaderRow(oWorksheet, "G", "6", "Статус", 20);
+            createExcelHeaderRow(oWorksheet, "H", "7", "Согласующий руководитель", 40);
+            createExcelHeaderRow(oWorksheet, "I", "8", "Ознакомлен с годовыми целями", 40);
+            createExcelHeaderRow(oWorksheet, "J", "9", "Промежуточная оценка согласована", 40);
+            createExcelHeaderRow(oWorksheet, "K", "10", "Итоговая оценка согласована", 40);
+            createExcelHeaderRow(oWorksheet, "L", "11", "Оценка результата", 20);
+            createExcelHeaderRow(oWorksheet, "M", "12", "Комментарий руководителя по оценке", 40);
+            createExcelHeaderRow(oWorksheet, "N", "13", "Уровень потенциала", 20);
+            createExcelHeaderRow(oWorksheet, "O", "14", "Уровень профессионализма", 20);
+            createExcelHeaderRow(oWorksheet, "P", "15", "Риск ухода", 20);
+            createExcelHeaderRow(oWorksheet, "Q", "16", "Комментарий руководителя по развитию", 40);
+
+            row_number = 3;
+            for (row in data) {
+                row_number++;
+
+                createExcelRow(oWorksheet, "A", row_number, row.department);
+                createExcelRow(oWorksheet, "B", row_number, row.position_parent_name);
+                createExcelRow(oWorksheet, "C", row_number, row.fake_position_name);
+                createExcelRow(oWorksheet, "D", row_number, row.login);
+                createExcelRow(oWorksheet, "E", row_number, row.fullname);
+                createExcelRow(oWorksheet, "F", row_number, row.period_name);
+                createExcelRow(oWorksheet, "G", row_number, row.state_name);
+                createExcelRow(oWorksheet, "H", row_number, row.manager_fullname);
+                createExcelRow(oWorksheet, "I", row_number, row.is_informed_goals ? "Да" : "Нет");
+                createExcelRow(oWorksheet, "J", row_number, row.is_approved_y1 ? "Да" : "Нет");
+                createExcelRow(oWorksheet, "K", row_number, row.is_approved_y2 ? "Да" : "Нет");
+                createExcelRow(oWorksheet, "L", row_number, row.goal_result_name);
+                createExcelRow(oWorksheet, "M", row_number, row.comment_manager);
+                createExcelRow(oWorksheet, "N", row_number, row.potential_name);
+                createExcelRow(oWorksheet, "O", row_number, row.profession_name);
+                createExcelRow(oWorksheet, "P", row_number, row.escape_risk_name);
+                createExcelRow(oWorksheet, "Q", row_number, row.comment_manager_by_grow);
+
+            }
+
+            oExcelDoc.SaveAs(temp_folder + "\\" + file_name);
+
+            var excel_byte_data = LoadFileData(temp_folder + "\\" + file_name);
+            try {
+                DeleteFile(temp_folder + "\\" + file_name);
+            } catch(ex) {}
+
+            var binary_data = new Binary();
+            binary_data.AssignStr(excel_byte_data);
+
+            return_file = true;
+
+            Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            Response.WriteBinary(binary_data);
+        }
+        catch(err){
+            alert(err);
+        }
+
+        break;
+}
+
+Response.Write(tools.object_to_text(result, 'json'));
+
+%>

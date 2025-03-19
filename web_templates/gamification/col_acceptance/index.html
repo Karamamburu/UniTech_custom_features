@@ -1,0 +1,131 @@
+<%
+Server.Execute(AppDirectoryPath() + "/wt/web/include/user_init.html" );
+DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_game_tools.js"));
+custom_game_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_game_tools.js"));
+
+DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_tools.js"));
+custom_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_tools.js"));
+
+result = {
+    'success': true
+};
+
+request_body = tools.read_object(Request.Body);
+mode = request_body.GetOptProperty('mode', '');
+
+
+switch(mode) {
+	case 'get_acceptance':
+        pageNumber = request_body.GetOptProperty('pageNumber', '');
+        pageSize = request_body.GetOptProperty('pageSize', 10);
+        user_id = request_body.GetOptProperty('userID', 0);
+        if (pageNumber == '' || pageNumber < 1 || pageSize < 1) {
+            result.success = false;
+        } else {
+            sql = "sql:
+                DECLARE
+                   @PageNumber INT = " + pageNumber + ",
+                   @PageSize INT = 2;
+                DECLARE @cur_user_id bigint = "+ curUserID +";
+                DECLARE @coll_id bigint = "+ user_id +";
+                WITH likes_data as (
+                    select
+                        collaborator_id,
+                        object_id
+                 from cc_likes
+                 GROUP BY collaborator_id, object_id
+                ),
+                main_data as(
+                 SELECT
+                 ROW_NUMBER() OVER (ORDER BY ts.date) AS RowNum,
+                 CASE
+                         WHEN ld.collaborator_id is null THEN 0
+                         ELSE 1
+                 END
+                 AS you_liked,
+                 (select COUNT(*) from likes_data where object_id = accs.id) AS like_count,
+                 accs.id,
+                 accs.name,
+                 ISNULL(accs.new_entry, '0') 'new_entry',
+                 ISNULL(FORMAT(accs.create_date, 'dd.MM.yyyy'), 'Дата отсутствует') 'create_date',
+                 cls.fullname,
+                 acc.data.value('(//description)[1]', 'nvarchar(max)') 'description',
+                 ts.date as tsDate,
+                 pic_url = CASE
+                    WHEN ISNULL(accs.resource_id, '') = ''
+                        THEN ''
+                        ELSE '/download_file.html?file_id=' + CAST(accs.resource_id AS NVARCHAR)
+                 END
+                 FROM cc_acceptances accs
+                 JOIN transactions ts on ts.id = accs.in_transaction_id
+                 INNER JOIN collaborators cls ON cls.id = accs.sender_id
+                 INNER JOIN cc_acceptance acc ON acc.id = accs.id
+                 LEFT JOIN likes_data ld on ld.object_id = accs.id and ld.collaborator_id = @cur_user_id
+                 WHERE accs.recipient_id = @coll_id
+                )SELECT
+                		(select COUNT(*) from main_data) / 2 as totalPages,
+                        RowNum,
+                        you_liked,
+                        like_count,
+                        id,
+                        name,
+                        new_entry,
+                        create_date,
+                        fullname,
+                        description,
+                        tsDate,
+                        pic_url
+                    FROM main_data
+
+                 ORDER BY tsDate DESC
+                 OFFSET (@PageNumber - 1) * @PageSize ROWS
+                 FETCH NEXT @PageSize ROWS ONLY;
+            ";
+            result = ArraySelectAll(XQuery(sql))
+
+                for (elem in result) {
+                    try {
+                        if (elem.new_entry) {
+                            acceptanceDoc = OpenDoc(UrlFromDocID(elem.id));
+                            acceptanceDoc.TopElem.new_entry = false;
+                            acceptanceDoc.Save();
+                        }
+                    } catch(err) {
+                        alert(err)
+                    }
+                }
+
+        }
+        break;
+
+    case 'set_like_for_acceptance':
+		try{
+            var data = {
+                code: 'cc_acceptance',
+                id: request_body.GetOptProperty('id', ''),
+                name: request_body.GetOptProperty('name', ''),
+                lastStatus: request_body.GetOptProperty('status', ''),
+                userID: curUserID,
+            }
+
+            request = custom_game_tools.setLike(data);
+            if(request.result == 'success'){
+                result.success = true;
+                result.data = request;
+            }else{
+                result.success = false;
+                result.data = request;
+            }
+            
+
+
+		} catch(err){
+			result.success = false;
+		}
+        break;
+        
+}
+
+Response.Write(tools.object_to_text(result, 'json', 5));
+
+%>

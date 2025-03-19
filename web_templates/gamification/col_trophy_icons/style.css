@@ -1,0 +1,256 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+.block-wrapper-ti {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-sizing: border-box;
+    flex-grow: 1;
+    border-radius: 0.8rem;
+    padding: 1em 0em 1em 0em;
+}
+.block-header-ti{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 0.8rem 0.8rem 0 0;
+    padding: 0.5em 1.5em 0.5em 1.5em;
+    background-color: #FFFFFF;
+    border-color: #EBEBEC;
+    border-style: none none solid none;
+    border-width: 0 0 1px 0;
+    
+ 
+}
+/* Стили для tooltip */
+#custom-tooltip-ti {
+    display: none;
+    position: fixed;
+    transform: translate(-50%, -50%);
+    max-width: 800px;
+    max-height: 80%;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent
+}
+/* Затемнение фона */
+#overlay-ti {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999; /* Под tooltip */
+}
+
+.block-bottom-ti{
+    border-radius: 0 0 0.8rem 0.8rem;
+    padding: 1em 0 0 0;
+    background-color: #FFFFFF;
+    border-color: #EBEBEC;
+    border-style: none none solid none;
+    border-width: 0 0 1px 0; 
+}
+.block-header-title-ti{
+    width: 100%;
+    flex-grow: 1;
+    text-align: left;
+}
+.top-trophy-icons-header-title-text{
+    font-family: Inter, Arial, sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    color: #151D2D;
+    font-size: 1.01em;
+}
+.block-outer-btn-ti[disabled] {
+    fill: #C9CED4;
+    background-color: transparent;
+    border: none;
+}
+.block-outer-btn-ti {
+    width: 3.2em;
+    min-width: 3.2em;
+    max-width: 3.2em;
+    height: 3.2em;
+    min-height: 3.2em;
+    max-height: 3.2em;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75em;
+    border-radius: 50%;
+    border:none;
+}
+.block-outer-btn-ti[wt-role='btn-page-prev'] {
+    margin-right: 0.5em;
+}
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+#my-ti_empty{
+    background-color: #f2f2f3;
+    position: absolute;
+    top: 20%;
+    left: 15%;
+    border-radius: 0.8rem;
+    text-align: center;
+    width: 70%;
+    padding: 25px 0;
+}
+.grid-ti {
+
+    height: 250px;
+
+    background-color: #fff;
+    padding: 10px 0 0 0;
+    position: relative;
+    box-sizing: border-box;
+    flex-grow: 1;
+    border-radius: 0.8rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 колонки с одинаковой шириной */
+    gap: 10px; /* Расстояние между элементами */
+    width: 100%; /* Ширина контейнера 100% */
+}
+
+
+.box-div-img-ti {
+    width: auto; 
+    height: 152px;
+    display: block; 
+    justify-content: center; 
+    align-items: center; 
+    overflow: hidden;
+  }
+.box-icon-ti {
+    width: 100% !important; 
+    height: -webkit-fill-available !important;
+    object-fit: contain;
+}
+
+
+.box-div-ti {
+    resize: none;
+    display: inline;
+    padding: 10px 10px 0 10px;
+    text-align: center;
+  }
+.like-img-ti{
+    width: auto !important;
+    height: auto !important;
+}
+.grid-item-ti img {
+    width: 125px;
+    height: 125px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.grid-item-ti h3 {
+    margin: 10px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.grid-item-ti p {
+    font-size: 14px;
+    color: #666;
+}
+.description-ti {
+    padding: 5px 0 0 0;
+    width: 85%;
+    color: #303030;
+    -webkit-line-clamp: 4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.description-ti p{
+    margin: 0 !important;
+}
+
+
+.title-style-ti{
+    font-family: Inter, Arial, sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    color: #151D2D;
+    font-size: 0.8em;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.loader-ti {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    display: block;
+    margin: 0 auto;
+    width: 48px;
+    height: 48px;
+    border: 5px solid #000;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    z-index: 1000;
+    }
+
+    @keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+   .grid-item-ti {
+    position: relative; /* Для привязки абсолютного позиционирования */
+    padding: 10px;
+    display: flex;
+    background-color: #fff;
+
+    text-align: center;
+    flex-direction: column;
+
+  }
+  
+  .comment {
+    visibility: hidden;
+    position: absolute; /* Абсолютное позиционирование */
+    top: 75%; /* Располагаем ниже grid-item-ti */
+    left: 0; /* Выравниваем по левому краю */
+    width: 100%; /* Ширина равна grid-item-ti */
+    background-color: #EADCFB;
+    color: #000;
+    z-index: 10; /* Убедимся, что элемент поверх других */
+    padding: 10px; /* Отступы внутри */
+    display: none; /* По умолчанию скрыт */
+    font-size: 14px;
+  }
+  
+  .grid-item-ti:hover .comment {
+    visibility: visible;
+  }
+ 

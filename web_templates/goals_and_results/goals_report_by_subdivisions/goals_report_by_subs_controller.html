@@ -1,0 +1,115 @@
+<%
+function createExcelHeaderRow(oWorksheet, column_name, column_number, value, column_width) {
+    oCell = oWorksheet.Cells.GetCell(column_name + "3");
+    oCell.Value = RValue(value);
+    oCell.Style.FontSize = 10;
+    oCell.Style.IsBold = true;
+    oCell.Style.HorizontalAlignment = "Center";
+    oCell.Style.VerticalAlignment = "Center";
+    oCell.Style.IsTextWrapped = true;
+    oCell.Style.Borders.SetStyle("Thin");
+    oCell.Style.Borders.SetColor("#000000");
+    oCell.Style.ForegroundColor = "#d9d9d9";
+    oWorksheet.Cells.SetColumnWidth(Int(column_number), Real(column_width));
+}
+
+function createExcelRow(oWorksheet, column_name, row_number, value) {
+    oCell = oWorksheet.Cells.GetCell(column_name + "" + row_number);
+    oCell.Value = RValue(value);
+    oCell.Style.FontSize = 10;
+    oCell.Style.IsBold = false;
+    oCell.Style.HorizontalAlignment = "Center";
+    oCell.Style.VerticalAlignment = "Center";
+    oCell.Style.IsTextWrapped = true;
+    oCell.Style.Borders.SetStyle("Thin");
+    oCell.Style.Borders.SetColor("#000000");
+}
+
+function isNullOrEmpty(value) {
+    if (value == null || value == undefined || value == '') {
+        return true;
+    }
+    return false;
+}
+
+result = {
+    "success": false
+};
+periods = ArraySelectAll(XQuery("sql: SELECT * FROM cc_periods"));
+goalmap_states = ArraySelectAll(XQuery("sql: SELECT * FROM cc_goalmap_states"));
+
+switch(Request.Query.GetOptProperty("mode")) {
+    case 'columns':
+        result = [{
+            "dataField": "fullname",
+            "caption": "Сотрудник",
+            "dataType": "string",
+            "sortOrder": 'asc',
+            "minWidth": 200,
+        },
+        {
+            "dataField": "period_id",
+            "caption": "Период",
+            "dataType": "string",
+            "minWidth": 100,
+            "width": "auto",
+            "lookup": {
+                "dataSource": periods,
+                "valueExpr": "id",
+                "displayExpr": "year",
+            }
+        },
+        {
+            "dataField": "state_id",
+            "caption": "Статус",
+            "dataType": "string",
+            "minWidth": 250,
+            "width": "auto",
+            "lookup": {
+                "dataSource": goalmap_states,
+                "valueExpr": "id",
+                "displayExpr": "name",
+            }
+        }, {
+            "dataField": "is_approved_y1",
+            "caption": "1 полугодие",
+            "dataType": "boolean",
+            "minWidth": 120,
+            "width": "auto",
+        }, {
+            "dataField": "is_approved_y2",
+            "caption": "2 полугодие",
+            "dataType": "boolean",
+            "minWidth": 120,
+            "width": "auto",
+        }];
+        break;
+
+    case 'catalog':
+        Server.Execute("../../include/user_init.html");
+
+        sql_request = "sql:
+            DECLARE
+            @cur_user_id BIGINT = " + curUserID + ";
+
+            SELECT
+                gms.id,
+                cls.fullname,
+                gms.period_id,
+                gms.state_id,
+                gms.is_approved_y1,
+                gms.is_approved_y2,
+                '/_wt/goal_setting_col?col_id=' + CAST(cls.id AS NVARCHAR) + '&goalmap_id=' + CAST(gms.id AS NVARCHAR) 'link'
+            FROM cc_goalmaps gms
+            INNER JOIN collaborators cls ON cls.id = gms.collaborator_id
+            WHERE gms.manager_id = @cur_user_id
+        ";
+
+        result = ArraySelectAll(XQuery(sql_request));
+
+        break;
+}
+
+Response.Write(tools.object_to_text(result, 'json'));
+
+%>

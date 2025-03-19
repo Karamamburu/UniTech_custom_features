@@ -1,0 +1,227 @@
+<link rel="stylesheet" type="text/css" href="/custom/dx_grid/dx.light.css" />
+<script src="/custom/dx_grid/dx.all.js"></script>
+<script src="/custom/dx_grid/dx.messages.ru.js"></script>
+
+<div class="header-text">
+    <div id="main_header_text" class="header-text-main">Цели и результаты команды</div>
+    <!-- <div class="header-text-second">
+        Второй заголовок
+    </div> -->
+</div>
+
+<div class="dx-viewport">
+    <div id="gridContainer"></div>
+</div>
+
+<script>
+    DevExpress.localization.locale('ru');
+
+    function sendRequest(body, action, prop_name) {
+        var response_data;
+
+        $.ajax({
+            url: 'goal_settings/goal_setting_report_my_subs_extended/goal_setting_report_my_subs_extended_controller.html',
+            type: "POST",
+            dataType: "JSON",
+            data: JSON.stringify(body),
+            async: false,
+            error: (xhr, message) => {
+                alert("SERVER ERROR\n" + message);
+            },
+            success: (data) => {
+                response_data = data;
+
+                if (prop_name) {
+                    action(data[prop_name]);
+                } else {
+                    action(data);
+                }
+            }
+        });
+
+        return response_data;
+    }
+
+    collaborators = [];
+    columns = [];
+
+    sendRequest({
+        mode: 'catalog'
+    }, (data) => {
+        collaborators = data;
+    });
+
+    sendRequest({
+        mode: 'columns'
+    }, (data) => {
+        columns = data;
+    });
+
+    columns.forEach(column => {
+        if (column.dataField === 'fullname') {
+            column.cellTemplate = function (container, options) {
+                    $('<a/>').addClass('dx-link')
+                        .text(options.data.fullname)
+                        .on('dxclick', function () {
+                            window.open(options.data.link, '_blank').focus();
+                        })
+                        .appendTo(container);
+                }
+        }
+        if (column.dataField === 'is_informed_goals') {
+            column.cellTemplate = function(container, options) {
+                var isFamiliar = options.data.is_informed_goals;
+                var text = isFamiliar ? "Да" : "Нет";
+                container.text(text);
+            }
+        }
+        if (column.dataField === 'is_approved_y1') {
+            column.cellTemplate = function(container, options) {
+                var isFamiliar = options.data.is_approved_y1;
+                var text = isFamiliar ? "Да" : "Нет";
+                container.text(text);
+            }
+        }
+        if (column.dataField === 'is_approved_y2') {
+            column.cellTemplate = function(container, options) {
+                var isFamiliar = options.data.is_approved_y2;
+                var text = isFamiliar ? "Да" : "Нет";
+                container.text(text);
+            }
+        }
+        if (column.dataField === 'goal_result_name') {
+            column.cellTemplate = function(container, options) {
+                var text = options.data.goal_result_name ? options.data.goal_result_name : "Нет";
+                container.text(text);
+            }
+        }
+    });
+
+    $(function () {
+        var dataGrid = $("#gridContainer").dxDataGrid({
+            keyExpr: 'id',
+            dataSource: collaborators,
+            columnsAutoWidth: true,
+            showBorders: true,
+            allowColumnResizing: true,
+            columnResizingMode: "widget",
+            editing: {
+                allowUpdating: false
+            },
+            paging: {
+                pageSize: 10
+            },
+            pager: {
+                showPageSizeSelector: true,
+                allowedPageSizes: [10, 20, 50],
+                showNavigationButtons: true
+            },
+            filterRow: {
+                visible: true,
+                applyFilter: "auto"
+            },
+            height: function () {
+                return window.innerHeight / 1.3;
+            },
+            onToolbarPreparing: function (e) {
+                let toolbarItems = e.toolbarOptions.items;
+
+				toolbarItems.unshift({
+                    widget: "dxCheckBox",
+                    location: "before",
+                    options: {
+                        text: "Только прямые подчиненные",
+                        value: false,
+                        onValueChanged: function(e) {
+                            sendRequest({
+                                mode: 'catalog',
+                                directSubordinate: e.value,
+                            }, (data) => {
+                                collaborators = data;
+                                dataGrid.option('dataSource', collaborators);
+                            });
+                        },
+						elementAttr: {
+							id: 'directSubordinateCheckBox'
+						}
+                    }
+                });
+
+                toolbarItems.unshift({
+                    widget: "dxButton",
+                    location: (window.screen.width >= 775 ? "after" : "before"),
+                    options: {
+                        text: 'Выгрузить в файл',
+                        type: 'default'
+                    },
+                    onClick() {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'goal_settings/goal_setting_report_my_subs_extended/goal_setting_report_my_subs_extended_controller.html?mode=excel', true);
+                        xhr.responseType = 'arraybuffer';
+                        xhr.onload = function (e) {
+                            var blob = new Blob([this.response], { type: 'application/vnd.ms-excel' });
+                            var downloadUrl = URL.createObjectURL(blob);
+                            var a = document.createElement("a");
+                            a.href = downloadUrl;
+                            a.download = "goal_setting_report_my_subs.xlsx";
+                            a.click();
+                        };
+                        xhr.send(JSON.stringify({
+                            mode: 'excel',
+							directSubordinate: $("#directSubordinateCheckBox").dxCheckBox("instance").option("value")
+                        }));
+                    },
+                });
+            },
+            columns: columns
+        }).dxDataGrid('instance');
+    });
+
+</script>
+
+<style>
+    .dx-viewport {
+        /* margin-left: auto;
+        margin-right: auto; */
+        width: calc(100vw - 3em);
+        margin-left: 1em;
+        max-width: 80em;
+        border-radius: 2px;
+    }
+
+    .header-text {
+        margin-left: 1em;
+        padding: 1em 0em;
+    }
+
+    .header-text-main {
+        font-size: 24px;
+    }
+
+    .header-text-second {
+        margin: 1em 0em 1em 0em;
+    }
+
+    .dx-datagrid-borders > .dx-datagrid-header-panel {
+        padding: .5em 0em 0em .5em;
+        border: 1px solid #ddd;
+    }
+
+    .dx-datagrid-borders > .dx-datagrid-pager {
+        border: 1px solid #ddd;
+    }
+
+    td[role=columnheader] {
+        text-align: left!important
+    }
+
+    .dx-datagrid-headers .dx-datagrid-text-content {
+        white-space: normal !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
+    }
+
+    .dx-button {
+        margin-right: .5em !important;
+    }
+</style>
