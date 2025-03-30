@@ -1,4 +1,4 @@
-<%
+
 Server.Execute(AppDirectoryPath() + "/wt/web/include/user_init.html" );
 DropFormsCache(FilePathToUrl(AppDirectoryPath()+"/custom_tools/custom_game_tools.js"));
 custom_game_tools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_game_tools.js"));
