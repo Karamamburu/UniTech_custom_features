@@ -165,3 +165,57 @@ function createBellNotification(col_id, object_id, object_type, text, link) {
     _notification_doc.Save()
 
 }
+
+/**
+ * @function assignRewardsToColsByRestaurant
+ * @description функция для присвоения сотрудникам ресторана награды
+ * @param {id} reward_id - id награды
+ * @param {id} restaurant_id - id ресторана
+ * @param {string} sender_id - id отправителя
+ * @param {string} text_comment - текстовый комментарий к награде
+ */
+function assignRewardsToColsByRestaurant(reward_id, restaurant_id, sender_id, text_comment) {
+	var journalName = "assign_rewards_to_cols_by_restaurant"
+	EnableLog(journalName, true)
+	LogEvent(journalName, "Начинаем присвоение наград")
+	var CustomGameTools = OpenCodeLib(FilePathToUrl(AppDirectoryPath() + "/custom_tools/custom_game_tools.js"));
+
+	var queryCollaborators = "sql:
+								SELECT 
+									id, 
+									fullname, 
+									position_id,
+									position_name,
+									position_parent_id,
+									position_parent_name,
+									org_id,
+									org_name
+								FROM collaborators
+								WHERE position_parent_id = " + restaurant_id + " 
+								AND is_dismiss = 0
+	"
+
+	var colsToAssignRewards = ArraySelectAll(XQuery(queryCollaborators))
+
+	if (!ArrayCount(colsToAssignRewards)) {
+
+		LogEvent(journalName, "В ресторане " + ArrayOptFirstElem(colsToAssignRewards).position_parent_name + " не найдено сотрудников")
+
+	} else {
+		
+		LogEvent(journalName, "Сотрудников в ресторане " + ArrayOptFirstElem(colsToAssignRewards).position_parent_name + " - " + ArrayCount(colsToAssignRewards))
+
+		for (col in colsToAssignRewards) {
+			try {
+
+				CustomGameTools.giveTrophyToUser(col.id, reward_id, sender_id, text_comment)
+
+				LogEvent(journalName, "Награда для сотрудника " + col.fullname + " успешно присвоена")
+			} catch (ex) {
+				LogEvent(journalName, 'Ошибка: ', ex);
+				}	
+			}	
+	}
+	LogEvent(journalName, "Присвоение наград успешно завершено")
+	EnableLog(journalName, false)
+}

@@ -354,10 +354,25 @@
                                 font-size: 20px;
                               "
                             >
+                            <!-- тема письма -->
+                            <!-- <%=objDoc.person_id.ForeignElem.position_name == 'FOH TM' || objDoc.person_id.ForeignElem.position_name == 'MOH TM' || objDoc.person_id.ForeignElem.position_name == 'BOH TM' || objDoc.person_id.ForeignElem.position_name == 'Team Member' || objDoc.person_id.ForeignElem.position_name == 'Team Trainer' || objDoc.person_id.ForeignElem.position_name == 'Shift Supervisor'  || objDoc.person_id.ForeignElem.position_name == 'Assistant Manager' || objDoc.person_id.ForeignElem.position_name == 'RGM' || objDoc.person_id.ForeignElem.position_name == 'RGM Trainee' ? 'Поступили данные кандидата на позицию в ресторане!' : 'Поступило резюме кандидата на вакансию ' + tools.open_doc(objDocID).TopElem.custom_elems.ObtainChildByKey("wishful_position_name").value%> -->
+                            <%
+                            var isFromRestaurant 
+                            (objDoc.person_id.ForeignElem.position_name == 'FOH TM' || 
+                            objDoc.person_id.ForeignElem.position_name == 'MOH TM' || 
+                            objDoc.person_id.ForeignElem.position_name == 'BOH TM' || 
+                            objDoc.person_id.ForeignElem.position_name == 'Team Member' || 
+                            objDoc.person_id.ForeignElem.position_name == 'Team Trainer' || 
+                            objDoc.person_id.ForeignElem.position_name == 'Shift Supervisor'  || 
+                            objDoc.person_id.ForeignElem.position_name == 'Assistant Manager' || 
+                            objDoc.person_id.ForeignElem.position_name == 'RGM' || 
+                            objDoc.person_id.ForeignElem.position_name == 'RGM Trainee') ?
+                            isFromRestaurant = true :
+                            isFromRestaurant = false
+                            %>
                             <b><%=tools.call_code_library_method("get_readable", "getReadableShortName", [objDoc.person_fullname]) %></b>
-                            прислал резюме на позицию <b><%=tools.open_doc(objDocID).TopElem.custom_elems.ObtainChildByKey("wishful_position_name").value%></b> 
-                            и теперь участвует в программе Приведи Друга. <br>
-                            Посмотреть заявку и скачать резюме можно здесь:
+                            прислал <%=isFromRestaurant ? ' данные кандидата на позицию в ресторане' : ' резюме на позицию <b>' + tools.open_doc(objDocID).TopElem.custom_elems.ObtainChildByKey("wishful_position_name").value + '</b>'%> и теперь участвует в программе Приведи Друга. <br>
+                            Посмотреть заявку можно здесь:
                             </div>
                           </td>
                         </tr>
@@ -468,7 +483,7 @@
                                       background-color: #933bbc;
                                       border-radius: 45px;
                                     "
-                                    href=<%=UrlAppendPath( global_settings.settings.portal_base_url, "_wt/" + tools.open_doc(objDocID).TopElem.custom_elems.ObtainChildByKey("cv_id").value)%>
+                                    href=<%=UrlAppendPath( global_settings.settings.portal_base_url, "_wt/" + objDocID)%>
                                   >
                                     Перейти к заявке
                                   </a>
